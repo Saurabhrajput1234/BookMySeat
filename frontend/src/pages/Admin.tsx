@@ -105,6 +105,9 @@ const Admin: React.FC = () => {
           [eventId]: prev[eventId]?.map(s => s.id === seatId ? { ...s, isBooked } : s) || []
         }));
       });
+      conn.on('BookingChanged', () => {
+        fetchBookings(eventId);
+      });
       setConnections(prev => ({ ...prev, [eventId]: conn }));
     }
   };
