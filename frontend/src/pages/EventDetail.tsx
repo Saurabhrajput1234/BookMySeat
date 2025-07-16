@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Alert from '@mui/material/Alert';
 import { getEventById, getSeatsForEvent, bookSeat } from '../services/api';
+import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 
 interface Event {
   id: number;
@@ -30,6 +31,7 @@ const EventDetail: React.FC = () => {
   const [seats, setSeats] = useState<Seat[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingMsg, setBookingMsg] = useState('');
+  const [connection, setConnection] = useState<HubConnection | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -38,6 +40,21 @@ const EventDetail: React.FC = () => {
         setSeats(data);
         setLoading(false);
       });
+      // SignalR connection
+      const conn = new HubConnectionBuilder()
+        .withUrl('http://localhost:5224/seathub')
+        .withAutomaticReconnect()
+        .build();
+      setConnection(conn);
+      conn.start().then(() => {
+        conn.invoke('JoinEventGroup', Number(id));
+      });
+      conn.on('SeatStatusUpdated', (seatId: number, isBooked: boolean) => {
+        setSeats(prevSeats => prevSeats.map(s => s.id === seatId ? { ...s, isBooked } : s));
+      });
+      return () => {
+        conn.stop();
+      };
     }
   }, [id]);
 

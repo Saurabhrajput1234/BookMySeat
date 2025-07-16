@@ -16,6 +16,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { getAllEvents, createEvent, deleteEvent } from '../services/api';
 import { getSeatsForEvent, addSeatToEvent, deleteSeat } from '../services/api';
 import { getBookingsForEvent, deleteBooking } from '../services/api';
+import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 
 interface Event {
   id: number;
@@ -54,6 +55,7 @@ const Admin: React.FC = () => {
   const [bookings, setBookings] = useState<Record<number, Booking[]>>({});
   const [bookingLoading, setBookingLoading] = useState<Record<number, boolean>>({});
   const [bookingError, setBookingError] = useState<Record<number, string>>({});
+  const [connections, setConnections] = useState<Record<number, HubConnection>>({});
 
   const fetchEvents = () => {
     setLoading(true);
@@ -70,6 +72,14 @@ const Admin: React.FC = () => {
 
   const handleExpand = (eventId: number) => {
     if (expandedEventId === eventId) {
+      // Clean up SignalR connection for this event
+      if (connections[eventId]) {
+        connections[eventId].stop();
+        setConnections(prev => {
+          const { [eventId]: _, ...rest } = prev;
+          return rest;
+        });
+      }
       setExpandedEventId(null);
       return;
     }
@@ -79,6 +89,23 @@ const Admin: React.FC = () => {
     }
     if (!bookings[eventId]) {
       fetchBookings(eventId);
+    }
+    // SignalR connection for this event
+    if (!connections[eventId]) {
+      const conn = new HubConnectionBuilder()
+        .withUrl('http://localhost:5224/seathub')
+        .withAutomaticReconnect()
+        .build();
+      conn.start().then(() => {
+        conn.invoke('JoinEventGroup', eventId);
+      });
+      conn.on('SeatStatusUpdated', (seatId: number, isBooked: boolean) => {
+        setSeats(prev => ({
+          ...prev,
+          [eventId]: prev[eventId]?.map(s => s.id === seatId ? { ...s, isBooked } : s) || []
+        }));
+      });
+      setConnections(prev => ({ ...prev, [eventId]: conn }));
     }
   };
 
@@ -182,6 +209,13 @@ const Admin: React.FC = () => {
   useEffect(() => {
     fetchEvents();
   }, []);
+
+  // Clean up all SignalR connections on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(connections).forEach(conn => conn.stop());
+    };
+  }, [connections]);
 
   return (
     <Container>
