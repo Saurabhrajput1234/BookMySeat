@@ -1,0 +1,7 @@
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.csproj.AssemblyReference.cache
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.AssemblyInfoInputs.cache
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.AssemblyInfo.cs
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.csproj.CoreCompileInputs.cache
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\saura\OneDrive\Desktop\React Course\.net\backend\obj\Debug\net8.0\EventBookingAPI.MvcApplicationPartsAssemblyInfo.cache
