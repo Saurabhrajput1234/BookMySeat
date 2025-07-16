@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import EventDetail from './pages/EventDetail';
 import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
 
 function App() {
   return (
@@ -21,6 +22,11 @@ function App() {
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute requiredRole="Admin"><Admin /></ProtectedRoute>} />
+        <Route path="/admin/users" element={
+          <ProtectedRoute requiredRole="Admin">
+            <AdminUsers />
+          </ProtectedRoute>
+        } />
         {/* Add more routes as you build more pages */}
       </Routes>
     </Router>

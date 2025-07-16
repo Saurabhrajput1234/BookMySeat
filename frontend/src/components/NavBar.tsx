@@ -24,7 +24,10 @@ const NavBar: React.FC = () => {
             <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
           )}
           {user?.role === 'Admin' && (
-            <Button color="inherit" component={Link} to="/admin">Admin</Button>
+            <>
+              <Button color="inherit" component={Link} to="/admin">Admin</Button>
+              <Button color="inherit" component={Link} to="/admin/users">Users</Button>
+            </>
           )}
         </Typography>
         {token ? (

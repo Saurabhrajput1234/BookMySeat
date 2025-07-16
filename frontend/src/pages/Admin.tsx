@@ -17,6 +17,13 @@ import { getAllEvents, createEvent, deleteEvent } from '../services/api';
 import { getSeatsForEvent, addSeatToEvent, deleteSeat } from '../services/api';
 import { getBookingsForEvent, deleteBooking } from '../services/api';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
+import Snackbar from '@mui/material/Snackbar';
 
 interface Event {
   id: number;
@@ -56,6 +63,13 @@ const Admin: React.FC = () => {
   const [bookingLoading, setBookingLoading] = useState<Record<number, boolean>>({});
   const [bookingError, setBookingError] = useState<Record<number, string>>({});
   const [connections, setConnections] = useState<Record<number, HubConnection>>({});
+  const [actionLoading, setActionLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogAction, setDialogAction] = useState<'deleteEvent' | 'deleteSeat' | 'cancelBooking' | null>(null);
+  const [selectedIds, setSelectedIds] = useState<{ eventId?: number; seatId?: number; bookingId?: number }>({});
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
   const fetchEvents = () => {
     setLoading(true);
@@ -189,24 +203,68 @@ const Admin: React.FC = () => {
     }
   };
 
-  const handleDeleteSeat = async (eventId: number, seatId: number) => {
-    setSeatError(prev => ({ ...prev, [eventId]: '' }));
-    try {
-      await deleteSeat(seatId);
-      fetchSeats(eventId);
-    } catch {
-      setSeatError(prev => ({ ...prev, [eventId]: 'Failed to delete seat.' }));
-    }
+  const handleDialogOpen = (action: 'deleteEvent' | 'deleteSeat' | 'cancelBooking', ids: { eventId?: number; seatId?: number; bookingId?: number }) => {
+    setDialogAction(action);
+    setSelectedIds(ids);
+    setDialogOpen(true);
   };
-
-  const handleCancelBooking = async (eventId: number, bookingId: number) => {
-    setBookingError(prev => ({ ...prev, [eventId]: '' }));
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setDialogAction(null);
+    setSelectedIds({});
+  };
+  const handleDeleteEvent = async () => {
+    if (!selectedIds.eventId) return;
+    setActionLoading(true);
+    setError('');
+    setSuccess('');
     try {
-      await deleteBooking(bookingId);
-      fetchBookings(eventId);
+      await deleteEvent(selectedIds.eventId);
+      setSuccess('Event deleted!');
+      setSnackbarMsg('Event deleted!');
+      setSnackbarSeverity('success');
+      fetchEvents();
     } catch {
-      setBookingError(prev => ({ ...prev, [eventId]: 'Failed to cancel booking.' }));
+      setError('Failed to delete event.');
+      setSnackbarMsg('Failed to delete event.');
+      setSnackbarSeverity('error');
     }
+    setActionLoading(false);
+    handleDialogClose();
+  };
+  const handleDeleteSeat = async () => {
+    if (!selectedIds.eventId || !selectedIds.seatId) return;
+    setActionLoading(true);
+    setSeatError(prev => ({ ...prev, [selectedIds.eventId!]: '' }));
+    try {
+      await deleteSeat(selectedIds.seatId);
+      setSnackbarMsg('Seat deleted!');
+      setSnackbarSeverity('success');
+      fetchSeats(selectedIds.eventId);
+    } catch {
+      setSeatError(prev => ({ ...prev, [selectedIds.eventId!]: 'Failed to delete seat.' }));
+      setSnackbarMsg('Failed to delete seat.');
+      setSnackbarSeverity('error');
+    }
+    setActionLoading(false);
+    handleDialogClose();
+  };
+  const handleCancelBooking = async () => {
+    if (!selectedIds.eventId || !selectedIds.bookingId) return;
+    setActionLoading(true);
+    setBookingError(prev => ({ ...prev, [selectedIds.eventId!]: '' }));
+    try {
+      await deleteBooking(selectedIds.bookingId);
+      setSnackbarMsg('Booking cancelled!');
+      setSnackbarSeverity('success');
+      fetchBookings(selectedIds.eventId);
+    } catch {
+      setBookingError(prev => ({ ...prev, [selectedIds.eventId!]: 'Failed to cancel booking.' }));
+      setSnackbarMsg('Failed to cancel booking.');
+      setSnackbarSeverity('error');
+    }
+    setActionLoading(false);
+    handleDialogClose();
   };
 
   useEffect(() => {
@@ -237,95 +295,126 @@ const Admin: React.FC = () => {
       </Box>
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6">All Events</Typography>
-        <List>
-          {events.map(ev => (
-            <React.Fragment key={ev.id}>
-              <ListItem
-                secondaryAction={
-                  <>
-                    <Button color="error" onClick={() => handleDelete(ev.id)}>Delete</Button>
-                    <IconButton onClick={() => handleExpand(ev.id)} sx={{ ml: 1 }}>
-                      {expandedEventId === ev.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                    </IconButton>
-                  </>
-                }
-              >
-                <ListItemText
-                  primary={ev.name}
-                  secondary={`Date: ${ev.date} | Location: ${ev.location} | ${ev.description}`}
-                />
-              </ListItem>
-              <Collapse in={expandedEventId === ev.id} timeout="auto" unmountOnExit>
-                <Box sx={{ pl: 4, pr: 2, pb: 2 }}>
-                  <Typography variant="subtitle1">Seats</Typography>
-                  {seatError[ev.id] && <Alert severity="error">{seatError[ev.id]}</Alert>}
-                  {seatLoading[ev.id] ? (
-                    <Typography>Loading...</Typography>
-                  ) : (
-                    <List dense>
-                      {seats[ev.id]?.map(seat => (
-                        <ListItem key={seat.id} secondaryAction={
-                          <Button color="error" size="small" onClick={() => handleDeleteSeat(ev.id, seat.id)} disabled={seat.isBooked}>
-                            Delete
-                          </Button>
-                        }>
-                          <ListItemText
-                            primary={`Row ${seat.row} - #${seat.number}`}
-                            secondary={seat.isBooked ? 'Booked' : 'Available'}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  )}
-                  <Box component="form" onSubmit={e => handleAddSeat(ev.id, e)} sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="Row"
-                      name="row"
-                      size="small"
-                      value={seatForm[ev.id]?.row || ''}
-                      onChange={e => handleSeatInputChange(ev.id, e)}
-                      required
-                    />
-                    <TextField
-                      label="Number"
-                      name="number"
-                      size="small"
-                      type="number"
-                      value={seatForm[ev.id]?.number || ''}
-                      onChange={e => handleSeatInputChange(ev.id, e)}
-                      required
-                    />
-                    <Button type="submit" variant="contained" size="small">Add Seat</Button>
-                  </Box>
-                  {/* Bookings Section */}
-                  <Box sx={{ mt: 4 }}>
-                    <Typography variant="subtitle1">Bookings</Typography>
-                    {bookingError[ev.id] && <Alert severity="error">{bookingError[ev.id]}</Alert>}
-                    {bookingLoading[ev.id] ? (
-                      <Typography>Loading...</Typography>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <List>
+            {events.map(ev => (
+              <React.Fragment key={ev.id}>
+                <ListItem
+                  secondaryAction={
+                    <>
+                      <Button color="error" onClick={() => handleDialogOpen('deleteEvent', { eventId: ev.id })} disabled={actionLoading}>Delete</Button>
+                      <IconButton onClick={() => handleExpand(ev.id)} sx={{ ml: 1 }}>
+                        {expandedEventId === ev.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      </IconButton>
+                    </>
+                  }
+                >
+                  <ListItemText
+                    primary={ev.name}
+                    secondary={`Date: ${ev.date} | Location: ${ev.location} | ${ev.description}`}
+                  />
+                </ListItem>
+                <Collapse in={expandedEventId === ev.id} timeout="auto" unmountOnExit>
+                  <Box sx={{ pl: 4, pr: 2, pb: 2 }}>
+                    <Typography variant="subtitle1">Seats</Typography>
+                    {seatError[ev.id] && <Alert severity="error">{seatError[ev.id]}</Alert>}
+                    {seatLoading[ev.id] ? (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress size={24} /></Box>
                     ) : (
                       <List dense>
-                        {bookings[ev.id]?.length ? bookings[ev.id].map(booking => (
-                          <ListItem key={booking.id} secondaryAction={
-                            <Button color="error" size="small" onClick={() => handleCancelBooking(ev.id, booking.id)}>
-                              Cancel
+                        {seats[ev.id]?.map(seat => (
+                          <ListItem key={seat.id} secondaryAction={
+                            <Button color="error" size="small" onClick={() => handleDialogOpen('deleteSeat', { eventId: ev.id, seatId: seat.id })} disabled={seat.isBooked || actionLoading}>
+                              Delete
                             </Button>
                           }>
                             <ListItemText
-                              primary={`User: ${booking.user.name} (${booking.user.email})`}
-                              secondary={`Seat: Row ${booking.seat.row} - #${booking.seat.number} | Time: ${new Date(booking.bookingTime).toLocaleString()} | Payment: ${booking.paymentStatus}`}
+                              primary={`Row ${seat.row} - #${seat.number}`}
+                              secondary={seat.isBooked ? 'Booked' : 'Available'}
                             />
                           </ListItem>
-                        )) : <Typography>No bookings yet.</Typography>}
+                        ))}
                       </List>
                     )}
+                    <Box component="form" onSubmit={e => handleAddSeat(ev.id, e)} sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                      <TextField
+                        label="Row"
+                        name="row"
+                        size="small"
+                        value={seatForm[ev.id]?.row || ''}
+                        onChange={e => handleSeatInputChange(ev.id, e)}
+                        required
+                        disabled={actionLoading}
+                      />
+                      <TextField
+                        label="Number"
+                        name="number"
+                        size="small"
+                        type="number"
+                        value={seatForm[ev.id]?.number || ''}
+                        onChange={e => handleSeatInputChange(ev.id, e)}
+                        required
+                        disabled={actionLoading}
+                      />
+                      <Button type="submit" variant="contained" size="small" disabled={actionLoading}>Add Seat</Button>
+                    </Box>
+                    {/* Bookings Section */}
+                    <Box sx={{ mt: 4 }}>
+                      <Typography variant="subtitle1">Bookings</Typography>
+                      {bookingError[ev.id] && <Alert severity="error">{bookingError[ev.id]}</Alert>}
+                      {bookingLoading[ev.id] ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress size={24} /></Box>
+                      ) : (
+                        <List dense>
+                          {bookings[ev.id]?.length ? bookings[ev.id].map(booking => (
+                            <ListItem key={booking.id} secondaryAction={
+                              <Button color="error" size="small" onClick={() => handleDialogOpen('cancelBooking', { eventId: ev.id, bookingId: booking.id })} disabled={actionLoading}>
+                                Cancel
+                              </Button>
+                            }>
+                              <ListItemText
+                                primary={`User: ${booking.user.name} (${booking.user.email})`}
+                                secondary={`Seat: Row ${booking.seat.row} - #${booking.seat.number} | Time: ${new Date(booking.bookingTime).toLocaleString()} | Payment: ${booking.paymentStatus}`}
+                              />
+                            </ListItem>
+                          )) : <Typography>No bookings yet.</Typography>}
+                        </List>
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              </Collapse>
-            </React.Fragment>
-          ))}
-        </List>
+                </Collapse>
+              </React.Fragment>
+            ))}
+          </List>
+        )}
       </Box>
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Confirm Action</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {dialogAction === 'deleteEvent' && 'Are you sure you want to delete this event?'}
+            {dialogAction === 'deleteSeat' && 'Are you sure you want to delete this seat?'}
+            {dialogAction === 'cancelBooking' && 'Are you sure you want to cancel this booking?'}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} disabled={actionLoading}>Cancel</Button>
+          {dialogAction === 'deleteEvent' && <Button onClick={handleDeleteEvent} color="primary" disabled={actionLoading}>Confirm</Button>}
+          {dialogAction === 'deleteSeat' && <Button onClick={handleDeleteSeat} color="primary" disabled={actionLoading}>Confirm</Button>}
+          {dialogAction === 'cancelBooking' && <Button onClick={handleCancelBooking} color="primary" disabled={actionLoading}>Confirm</Button>}
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMsg}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Container>
   );
 };

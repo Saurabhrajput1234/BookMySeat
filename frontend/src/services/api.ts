@@ -70,4 +70,19 @@ export const getBookingsForEvent = async (eventId: number) => {
 export const deleteBooking = async (bookingId: number) => {
   const response = await axios.delete(`${API_URL}/bookings/${bookingId}`);
   return response.data;
+};
+
+export const getUsers = async () => {
+  const response = await axios.get(`${API_URL}/users`);
+  return response.data;
+};
+
+export const updateUserRole = async (id: number, role: string) => {
+  const response = await axios.put(`${API_URL}/users/${id}/role`, role, { headers: { 'Content-Type': 'application/json' } });
+  return response.data;
+};
+
+export const toggleUserActive = async (id: number, isActive: boolean) => {
+  const response = await axios.put(`${API_URL}/users/${id}/active`, isActive, { headers: { 'Content-Type': 'application/json' } });
+  return response.data;
 }; 
