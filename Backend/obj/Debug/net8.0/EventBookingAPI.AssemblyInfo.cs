@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("1586ff9c-42b5-468d-8cb2-8fb00d35876b")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("EventBookingAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e075078d0c2af66860607e6f8c1ac2619441b6f2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b1517b5432453c362b3bb35d4699bc6a2fd1d9f1")]
 [assembly: System.Reflection.AssemblyProductAttribute("EventBookingAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EventBookingAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

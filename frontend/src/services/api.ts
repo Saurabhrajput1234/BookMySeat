@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api'; // Change to your backend URL
+const API_URL = 'http://localhost:5224/api'; // Change to your backend URL
 
 export const signup = async (name: string, email: string, password: string) => {
   const response = await axios.post(`${API_URL}/auth/register`, { name, email, password });
