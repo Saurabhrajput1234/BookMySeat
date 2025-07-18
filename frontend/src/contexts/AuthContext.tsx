@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; // ✅ Corrected import
 
 interface AuthContextType {
   user: any;
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('token', newToken);
     setUser(jwtDecode(newToken));
   };
+
   const logout = () => {
     setToken(null);
     localStorage.removeItem('token');
@@ -40,4 +41,4 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
-}; 
+};

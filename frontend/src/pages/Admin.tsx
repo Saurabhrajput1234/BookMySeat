@@ -6,17 +6,9 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Grid from '@mui/material/Grid';
-import Alert from '@mui/material/Alert';
-import Collapse from '@mui/material/Collapse';
 import IconButton from '@mui/material/IconButton';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { getAllEvents, createEvent, deleteEvent } from '../services/api';
-import { getSeatsForEvent, addSeatToEvent, deleteSeat } from '../services/api';
-import { getBookingsForEvent, deleteBooking } from '../services/api';
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -25,389 +17,187 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import Snackbar from '@mui/material/Snackbar';
 
+import {
+  getAllEvents,
+  deleteEvent,
+  getSeatsForEvent,
+  deleteSeat,
+  getBookingsForEvent,
+  deleteBooking
+} from '../services/api';
+
 interface Event {
   id: number;
   name: string;
-  description: string;
   date: string;
-  location: string;
 }
 
 interface Seat {
   id: number;
   row: string;
   number: number;
-  isBooked: boolean;
 }
 
 interface Booking {
   id: number;
-  user: { id: number; name: string; email: string };
-  seat: { id: number; row: string; number: number };
-  bookingTime: string;
-  paymentStatus: string;
+  userName: string;
+  seatId: number;
 }
 
 const Admin: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [form, setForm] = useState({ name: '', description: '', date: '', location: '' });
-  const [expandedEventId, setExpandedEventId] = useState<number | null>(null);
+  const [expandedEvent, setExpandedEvent] = useState<number | null>(null);
   const [seats, setSeats] = useState<Record<number, Seat[]>>({});
-  const [seatLoading, setSeatLoading] = useState<Record<number, boolean>>({});
-  const [seatError, setSeatError] = useState<Record<number, string>>({});
-  const [seatForm, setSeatForm] = useState<Record<number, { row: string; number: string }>>({});
   const [bookings, setBookings] = useState<Record<number, Booking[]>>({});
-  const [bookingLoading, setBookingLoading] = useState<Record<number, boolean>>({});
-  const [bookingError, setBookingError] = useState<Record<number, string>>({});
-  const [connections, setConnections] = useState<Record<number, HubConnection>>({});
-  const [actionLoading, setActionLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogAction, setDialogAction] = useState<'deleteEvent' | 'deleteSeat' | 'cancelBooking' | null>(null);
-  const [selectedIds, setSelectedIds] = useState<{ eventId?: number; seatId?: number; bookingId?: number }>({});
+  const [dialogMessage, setDialogMessage] = useState('');
+  const [onConfirm, setOnConfirm] = useState<() => void>(() => {});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
-  const fetchEvents = () => {
+  const fetchEvents = async () => {
     setLoading(true);
-    getAllEvents()
-      .then(data => {
-        setEvents(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to load events.');
-        setLoading(false);
-      });
-  };
-
-  const handleExpand = (eventId: number) => {
-    if (expandedEventId === eventId) {
-      // Clean up SignalR connection for this event
-      if (connections[eventId]) {
-        connections[eventId].stop();
-        setConnections(prev => {
-          const { [eventId]: _, ...rest } = prev;
-          return rest;
-        });
-      }
-      setExpandedEventId(null);
-      return;
-    }
-    setExpandedEventId(eventId);
-    if (!seats[eventId]) {
-      fetchSeats(eventId);
-    }
-    if (!bookings[eventId]) {
-      fetchBookings(eventId);
-    }
-    // SignalR connection for this event
-    if (!connections[eventId]) {
-      const conn = new HubConnectionBuilder()
-        .withUrl('http://localhost:5224/seathub')
-        .withAutomaticReconnect()
-        .build();
-      conn.start().then(() => {
-        conn.invoke('JoinEventGroup', eventId);
-      });
-      conn.on('SeatStatusUpdated', (seatId: number, isBooked: boolean) => {
-        setSeats(prev => ({
-          ...prev,
-          [eventId]: prev[eventId]?.map(s => s.id === seatId ? { ...s, isBooked } : s) || []
-        }));
-      });
-      conn.on('BookingChanged', () => {
-        fetchBookings(eventId);
-      });
-      setConnections(prev => ({ ...prev, [eventId]: conn }));
-    }
-  };
-
-  const fetchSeats = async (eventId: number) => {
-    setSeatLoading(prev => ({ ...prev, [eventId]: true }));
-    setSeatError(prev => ({ ...prev, [eventId]: '' }));
     try {
-      const data = await getSeatsForEvent(eventId);
-      setSeats(prev => ({ ...prev, [eventId]: data }));
+      const data = await getAllEvents();
+      setEvents(data);
     } catch {
-      setSeatError(prev => ({ ...prev, [eventId]: 'Failed to load seats.' }));
-    } finally {
-      setSeatLoading(prev => ({ ...prev, [eventId]: false }));
+      setSnackbarMsg('Failed to load events');
+      setSnackbarOpen(true);
     }
-  };
-
-  const fetchBookings = async (eventId: number) => {
-    setBookingLoading(prev => ({ ...prev, [eventId]: true }));
-    setBookingError(prev => ({ ...prev, [eventId]: '' }));
-    try {
-      const data = await getBookingsForEvent(eventId);
-      setBookings(prev => ({ ...prev, [eventId]: data }));
-    } catch {
-      setBookingError(prev => ({ ...prev, [eventId]: 'Failed to load bookings.' }));
-    } finally {
-      setBookingLoading(prev => ({ ...prev, [eventId]: false }));
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    try {
-      await createEvent(form);
-      setSuccess('Event created!');
-      setForm({ name: '', description: '', date: '', location: '' });
-      fetchEvents();
-    } catch {
-      setError('Failed to create event.');
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    setError('');
-    setSuccess('');
-    try {
-      await deleteEvent(id);
-      setSuccess('Event deleted!');
-      fetchEvents();
-    } catch {
-      setError('Failed to delete event.');
-    }
-  };
-
-  const handleSeatInputChange = (eventId: number, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setSeatForm(prev => ({
-      ...prev,
-      [eventId]: { ...prev[eventId], [e.target.name]: e.target.value }
-    }));
-  };
-
-  const handleAddSeat = async (eventId: number, e: React.FormEvent) => {
-    e.preventDefault();
-    setSeatError(prev => ({ ...prev, [eventId]: '' }));
-    try {
-      const form = seatForm[eventId];
-      if (!form?.row || !form?.number) return;
-      await addSeatToEvent(eventId, { row: form.row, number: Number(form.number) });
-      fetchSeats(eventId);
-      setSeatForm(prev => ({ ...prev, [eventId]: { row: '', number: '' } }));
-    } catch {
-      setSeatError(prev => ({ ...prev, [eventId]: 'Failed to add seat.' }));
-    }
-  };
-
-  const handleDialogOpen = (action: 'deleteEvent' | 'deleteSeat' | 'cancelBooking', ids: { eventId?: number; seatId?: number; bookingId?: number }) => {
-    setDialogAction(action);
-    setSelectedIds(ids);
-    setDialogOpen(true);
-  };
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-    setDialogAction(null);
-    setSelectedIds({});
-  };
-  const handleDeleteEvent = async () => {
-    if (!selectedIds.eventId) return;
-    setActionLoading(true);
-    setError('');
-    setSuccess('');
-    try {
-      await deleteEvent(selectedIds.eventId);
-      setSuccess('Event deleted!');
-      setSnackbarMsg('Event deleted!');
-      setSnackbarSeverity('success');
-      fetchEvents();
-    } catch {
-      setError('Failed to delete event.');
-      setSnackbarMsg('Failed to delete event.');
-      setSnackbarSeverity('error');
-    }
-    setActionLoading(false);
-    handleDialogClose();
-  };
-  const handleDeleteSeat = async () => {
-    if (!selectedIds.eventId || !selectedIds.seatId) return;
-    setActionLoading(true);
-    setSeatError(prev => ({ ...prev, [selectedIds.eventId!]: '' }));
-    try {
-      await deleteSeat(selectedIds.seatId);
-      setSnackbarMsg('Seat deleted!');
-      setSnackbarSeverity('success');
-      fetchSeats(selectedIds.eventId);
-    } catch {
-      setSeatError(prev => ({ ...prev, [selectedIds.eventId!]: 'Failed to delete seat.' }));
-      setSnackbarMsg('Failed to delete seat.');
-      setSnackbarSeverity('error');
-    }
-    setActionLoading(false);
-    handleDialogClose();
-  };
-  const handleCancelBooking = async () => {
-    if (!selectedIds.eventId || !selectedIds.bookingId) return;
-    setActionLoading(true);
-    setBookingError(prev => ({ ...prev, [selectedIds.eventId!]: '' }));
-    try {
-      await deleteBooking(selectedIds.bookingId);
-      setSnackbarMsg('Booking cancelled!');
-      setSnackbarSeverity('success');
-      fetchBookings(selectedIds.eventId);
-    } catch {
-      setBookingError(prev => ({ ...prev, [selectedIds.eventId!]: 'Failed to cancel booking.' }));
-      setSnackbarMsg('Failed to cancel booking.');
-      setSnackbarSeverity('error');
-    }
-    setActionLoading(false);
-    handleDialogClose();
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  // Clean up all SignalR connections on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(connections).forEach(conn => conn.stop());
-    };
-  }, [connections]);
+  const toggleExpand = async (eventId: number) => {
+    if (expandedEvent === eventId) {
+      setExpandedEvent(null);
+      return;
+    }
+    setExpandedEvent(eventId);
+    if (!seats[eventId]) {
+      try {
+        const seatData = await getSeatsForEvent(eventId);
+        const bookingData = await getBookingsForEvent(eventId);
+        setSeats(prev => ({ ...prev, [eventId]: seatData }));
+        setBookings(prev => ({ ...prev, [eventId]: bookingData }));
+      } catch {
+        setSnackbarMsg('Failed to load event details');
+        setSnackbarOpen(true);
+      }
+    }
+  };
+
+  const handleDelete = (msg: string, confirmAction: () => void) => {
+    setDialogMessage(msg);
+    setOnConfirm(() => confirmAction);
+    setDialogOpen(true);
+  };
+
+  const confirmAction = () => {
+    onConfirm();
+    setDialogOpen(false);
+  };
 
   return (
     <Container>
-      <Typography variant="h4" sx={{ mt: 4 }}>Admin Dashboard</Typography>
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">Create Event</Typography>
-        <Box component="form" onSubmit={handleCreate} sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          <TextField label="Name" name="name" value={form.name} onChange={handleInputChange} required sx={{ flex: '1 1 200px' }} />
-          <TextField label="Location" name="location" value={form.location} onChange={handleInputChange} required sx={{ flex: '1 1 200px' }} />
-          <TextField label="Date" name="date" type="date" value={form.date} onChange={handleInputChange} required InputLabelProps={{ shrink: true }} sx={{ flex: '1 1 200px' }} />
-          <TextField label="Description" name="description" value={form.description} onChange={handleInputChange} required sx={{ flex: '2 1 300px' }} />
-          <Button type="submit" variant="contained" color="primary" sx={{ minWidth: 150 }}>Create Event</Button>
+      <Typography variant="h4" sx={{ mt: 4 }}>Admin Panel</Typography>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+          <CircularProgress />
         </Box>
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
-      </Box>
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">All Events</Typography>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <List>
-            {events.map(ev => (
-              <React.Fragment key={ev.id}>
-                <ListItem
-                  secondaryAction={
-                    <>
-                      <Button color="error" onClick={() => handleDialogOpen('deleteEvent', { eventId: ev.id })} disabled={actionLoading}>Delete</Button>
-                      <IconButton onClick={() => handleExpand(ev.id)} sx={{ ml: 1 }}>
-                        {expandedEventId === ev.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                      </IconButton>
-                    </>
-                  }
-                >
-                  <ListItemText
-                    primary={ev.name}
-                    secondary={`Date: ${ev.date} | Location: ${ev.location} | ${ev.description}`}
-                  />
-                </ListItem>
-                <Collapse in={expandedEventId === ev.id} timeout="auto" unmountOnExit>
-                  <Box sx={{ pl: 4, pr: 2, pb: 2 }}>
-                    <Typography variant="subtitle1">Seats</Typography>
-                    {seatError[ev.id] && <Alert severity="error">{seatError[ev.id]}</Alert>}
-                    {seatLoading[ev.id] ? (
-                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress size={24} /></Box>
-                    ) : (
-                      <List dense>
-                        {seats[ev.id]?.map(seat => (
-                          <ListItem key={seat.id} secondaryAction={
-                            <Button color="error" size="small" onClick={() => handleDialogOpen('deleteSeat', { eventId: ev.id, seatId: seat.id })} disabled={seat.isBooked || actionLoading}>
-                              Delete
-                            </Button>
-                          }>
-                            <ListItemText
-                              primary={`Row ${seat.row} - #${seat.number}`}
-                              secondary={seat.isBooked ? 'Booked' : 'Available'}
-                            />
-                          </ListItem>
-                        ))}
-                      </List>
-                    )}
-                    <Box component="form" onSubmit={e => handleAddSeat(ev.id, e)} sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                      <TextField
-                        label="Row"
-                        name="row"
-                        size="small"
-                        value={seatForm[ev.id]?.row || ''}
-                        onChange={e => handleSeatInputChange(ev.id, e)}
-                        required
-                        disabled={actionLoading}
-                      />
-                      <TextField
-                        label="Number"
-                        name="number"
-                        size="small"
-                        type="number"
-                        value={seatForm[ev.id]?.number || ''}
-                        onChange={e => handleSeatInputChange(ev.id, e)}
-                        required
-                        disabled={actionLoading}
-                      />
-                      <Button type="submit" variant="contained" size="small" disabled={actionLoading}>Add Seat</Button>
+      ) : (
+        <List sx={{ mt: 4 }}>
+          {events.map(event => (
+            <React.Fragment key={event.id}>
+              <ListItem
+                secondaryAction={
+                  <>
+                    <IconButton onClick={() => toggleExpand(event.id)}>
+                      {expandedEvent === event.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                    </IconButton>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={() =>
+                        handleDelete('Delete this event?', async () => {
+                          await deleteEvent(event.id);
+                          fetchEvents();
+                        })
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </>
+                }
+              >
+                <ListItemText primary={event.name} secondary={event.date} />
+              </ListItem>
+              {expandedEvent === event.id && (
+                <Box sx={{ pl: 4, pb: 2 }}>
+                  <Typography variant="h6">Seats</Typography>
+                  {seats[event.id]?.map(seat => (
+                    <Box key={seat.id} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                      <Typography>
+                        Row {seat.row} - #{seat.number}
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() =>
+                          handleDelete('Delete this seat?', async () => {
+                            await deleteSeat(seat.id);
+                            toggleExpand(event.id);
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
                     </Box>
-                    {/* Bookings Section */}
-                    <Box sx={{ mt: 4 }}>
-                      <Typography variant="subtitle1">Bookings</Typography>
-                      {bookingError[ev.id] && <Alert severity="error">{bookingError[ev.id]}</Alert>}
-                      {bookingLoading[ev.id] ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}><CircularProgress size={24} /></Box>
-                      ) : (
-                        <List dense>
-                          {bookings[ev.id]?.length ? bookings[ev.id].map(booking => (
-                            <ListItem key={booking.id} secondaryAction={
-                              <Button color="error" size="small" onClick={() => handleDialogOpen('cancelBooking', { eventId: ev.id, bookingId: booking.id })} disabled={actionLoading}>
-                                Cancel
-                              </Button>
-                            }>
-                              <ListItemText
-                                primary={`User: ${booking.user.name} (${booking.user.email})`}
-                                secondary={`Seat: Row ${booking.seat.row} - #${booking.seat.number} | Time: ${new Date(booking.bookingTime).toLocaleString()} | Payment: ${booking.paymentStatus}`}
-                              />
-                            </ListItem>
-                          )) : <Typography>No bookings yet.</Typography>}
-                        </List>
-                      )}
+                  ))}
+
+                  <Typography variant="h6" sx={{ mt: 2 }}>Bookings</Typography>
+                  {bookings[event.id]?.map(booking => (
+                    <Box key={booking.id} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                      <Typography>
+                        {booking.userName} (Seat #{booking.seatId})
+                      </Typography>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        onClick={() =>
+                          handleDelete('Delete this booking?', async () => {
+                            await deleteBooking(booking.id);
+                            toggleExpand(event.id);
+                          })
+                        }
+                      >
+                        Delete
+                      </Button>
                     </Box>
-                  </Box>
-                </Collapse>
-              </React.Fragment>
-            ))}
-          </List>
-        )}
-      </Box>
-      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                  ))}
+                </Box>
+              )}
+            </React.Fragment>
+          ))}
+        </List>
+      )}
+
+      {/* Confirmation Dialog */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            {dialogAction === 'deleteEvent' && 'Are you sure you want to delete this event?'}
-            {dialogAction === 'deleteSeat' && 'Are you sure you want to delete this seat?'}
-            {dialogAction === 'cancelBooking' && 'Are you sure you want to cancel this booking?'}
-          </DialogContentText>
+          <DialogContentText>{dialogMessage}</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} disabled={actionLoading}>Cancel</Button>
-          {dialogAction === 'deleteEvent' && <Button onClick={handleDeleteEvent} color="primary" disabled={actionLoading}>Confirm</Button>}
-          {dialogAction === 'deleteSeat' && <Button onClick={handleDeleteSeat} color="primary" disabled={actionLoading}>Confirm</Button>}
-          {dialogAction === 'cancelBooking' && <Button onClick={handleCancelBooking} color="primary" disabled={actionLoading}>Confirm</Button>}
+          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button onClick={confirmAction} color="primary">Confirm</Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -419,4 +209,4 @@ const Admin: React.FC = () => {
   );
 };
 
-export default Admin; 
+export default Admin;

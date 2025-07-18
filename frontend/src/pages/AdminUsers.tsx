@@ -189,12 +189,15 @@ const AdminUsers: React.FC = () => {
         </DialogActions>
       </Dialog>
       <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        message={snackbarMsg}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      />
+  open={snackbarOpen}
+  autoHideDuration={3000}
+  onClose={() => setSnackbarOpen(false)}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+>
+  <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
+    {snackbarMsg}
+  </Alert>
+</Snackbar>
     </Container>
   );
 };

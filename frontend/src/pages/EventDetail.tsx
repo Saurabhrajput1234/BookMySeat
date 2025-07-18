@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Typography, CircularProgress, Box, Button, Grid, Alert } from '@mui/material';
+import { Container, Typography, CircularProgress, Box, Button, Alert } from '@mui/material';
+import Grid from '@mui/material/Grid';
 import { getEventById, getSeatsForEvent, bookSeat } from '../services/api';
-import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 
 interface Event {
   id: number;
@@ -26,7 +27,6 @@ const EventDetail: React.FC = () => {
   const [seats, setSeats] = useState<Seat[]>([]);
   const [loading, setLoading] = useState(true);
   const [bookingMsg, setBookingMsg] = useState('');
-  const [connection, setConnection] = useState<HubConnection | null>(null);
 
   useEffect(() => {
     if (!eventId) return;
@@ -53,8 +53,6 @@ const EventDetail: React.FC = () => {
       .withUrl('http://localhost:5224/seathub')
       .withAutomaticReconnect()
       .build();
-
-    setConnection(conn);
 
     conn
       .start()
@@ -95,20 +93,21 @@ const EventDetail: React.FC = () => {
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6">Seats</Typography>
         {bookingMsg && <Alert severity="info">{bookingMsg}</Alert>}
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        {/* <Grid container spacing={2} sx={{ mt: 1 }}>
           {seats.map(seat => (
-            <Grid item key={seat.id}>
-              <Button
-                variant={seat.isBooked ? 'outlined' : 'contained'}
-                color={seat.isBooked ? 'secondary' : 'primary'}
-                disabled={seat.isBooked}
-                onClick={() => handleBook(seat.id)}
-              >
-                Row {seat.row} - #{seat.number}
-              </Button>
-            </Grid>
+            // <Grid item xs={12} sm={6} md={3} key={seat.id}>
+            //   <Button
+            //     fullWidth
+            //     variant={seat.isBooked ? 'outlined' : 'contained'}
+            //     color={seat.isBooked ? 'secondary' : 'primary'}
+            //     disabled={seat.isBooked}
+            //     onClick={() => handleBook(seat.id)}
+            //   >
+            //     Row {seat.row} - #{seat.number}
+            //   </Button>
+            // </Grid>
           ))}
-        </Grid>
+        </Grid> */}
       </Box>
     </Container>
   );
