@@ -1,69 +1,49 @@
-# React + TypeScript + Vite
+# 🎟️ Book My Seat – Online Event Booking Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://book-my-seat-three.vercel.app/)  
+[![Code](https://img.shields.io/badge/View-Code-blue)](https://github.com/Saurabhrajput1234/BookMySeat)
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📌 Overview  
+**Book My Seat** is a full-stack web application designed to provide a seamless **event booking experience** with **real-time seat reservation** using SignalR. Built with **React (Frontend)** and **ASP.NET Core (Backend)**, it supports **JWT-based authentication**, role-based access (Admin/User), and secure payment processing.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Features  
+✅ **User Authentication & Authorization**  
+- Signup/Login with JWT  
+- Role-based access control (User/Admin)  
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+✅ **Event Management**  
+- Admin can create and manage events  
+- Users can view event details and book seats  
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+✅ **Real-time Seat Booking**  
+- Live seat availability updates using **SignalR**  
+- Prevents double booking  
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+✅ **Payment Integration**  
+- Secure payment service for seat booking  
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+✅ **Responsive UI**  
+- Built with **Material-UI** for a clean and modern interface  
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🛠️ Tech Stack  
+**Frontend:** React.js, Material-UI, Axios  
+**Backend:** ASP.NET Core, Entity Framework, SignalR  
+**Database:** PostgreSQL  
+**Authentication:** JWT (JSON Web Token)  
+**Real-Time:** SignalR  
+**Deployment:** Vercel (Frontend), Localhost for backend (can be hosted on Azure/AWS)  
+
+---
+
+## ⚙️ Installation & Setup  
+
+### **1. Clone the Repository**
+```bash
+git clone https://github.com/Saurabhrajput1234/BookMySeat.git
+cd BookMySeat
