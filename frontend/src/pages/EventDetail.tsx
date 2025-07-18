@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Typography, CircularProgress, Box, Button, Alert } from '@mui/material';
-import Grid from '@mui/material/Grid';
 import { getEventById, getSeatsForEvent, bookSeat } from '../services/api';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
@@ -91,23 +90,28 @@ const EventDetail: React.FC = () => {
         <Typography>Description: {event.description}</Typography>
       </Box>
       <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">Seats</Typography>
-        {bookingMsg && <Alert severity="info">{bookingMsg}</Alert>}
-        {/* <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Typography variant="h6" gutterBottom>Seats</Typography>
+        {bookingMsg && <Alert severity="info" sx={{ mt: 2 }}>{bookingMsg}</Alert>}
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
           {seats.map(seat => (
-            // <Grid item xs={12} sm={6} md={3} key={seat.id}>
-            //   <Button
-            //     fullWidth
-            //     variant={seat.isBooked ? 'outlined' : 'contained'}
-            //     color={seat.isBooked ? 'secondary' : 'primary'}
-            //     disabled={seat.isBooked}
-            //     onClick={() => handleBook(seat.id)}
-            //   >
-            //     Row {seat.row} - #{seat.number}
-            //   </Button>
-            // </Grid>
+            <Box
+              key={seat.id}
+              sx={{
+                width: { xs: '100%', sm: '48%', md: '23%' }, // responsive layout
+              }}
+            >
+              <Button
+                fullWidth
+                variant={seat.isBooked ? 'outlined' : 'contained'}
+                color={seat.isBooked ? 'secondary' : 'primary'}
+                disabled={seat.isBooked}
+                onClick={() => handleBook(seat.id)}
+              >
+                Row {seat.row} - #{seat.number}
+              </Button>
+            </Box>
           ))}
-        </Grid> */}
+        </Box>
       </Box>
     </Container>
   );
