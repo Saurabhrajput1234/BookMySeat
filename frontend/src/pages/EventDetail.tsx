@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Alert from '@mui/material/Alert';
+import { Container, Typography, CircularProgress, Box, Button, Grid, Alert } from '@mui/material';
 import { getEventById, getSeatsForEvent, bookSeat } from '../services/api';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 
@@ -26,7 +20,8 @@ interface Seat {
 }
 
 const EventDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const eventId = Number(id);
   const [event, setEvent] = useState<Event | null>(null);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,34 +29,51 @@ const EventDetail: React.FC = () => {
   const [connection, setConnection] = useState<HubConnection | null>(null);
 
   useEffect(() => {
-    if (id) {
-      getEventById(Number(id)).then(data => setEvent(data));
-      getSeatsForEvent(Number(id)).then(data => {
-        setSeats(data);
+    if (!eventId) return;
+
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [eventData, seatData] = await Promise.all([
+          getEventById(eventId),
+          getSeatsForEvent(eventId)
+        ]);
+        setEvent(eventData);
+        setSeats(seatData);
+      } catch {
+        setBookingMsg('Failed to load event data');
+      } finally {
         setLoading(false);
-      });
-      // SignalR connection
-      const conn = new HubConnectionBuilder()
-        .withUrl('http://localhost:5224/seathub')
-        .withAutomaticReconnect()
-        .build();
-      setConnection(conn);
-      conn.start().then(() => {
-        conn.invoke('JoinEventGroup', Number(id));
-      });
-      conn.on('SeatStatusUpdated', (seatId: number, isBooked: boolean) => {
-        setSeats(prevSeats => prevSeats.map(s => s.id === seatId ? { ...s, isBooked } : s));
-      });
-      return () => {
-        conn.stop();
-      };
-    }
-  }, [id]);
+      }
+    };
+
+    loadData();
+
+    const conn = new HubConnectionBuilder()
+      .withUrl('http://localhost:5224/seathub')
+      .withAutomaticReconnect()
+      .build();
+
+    setConnection(conn);
+
+    conn
+      .start()
+      .then(() => conn.invoke('JoinEventGroup', eventId))
+      .catch(err => console.error('SignalR Connection Error:', err));
+
+    conn.on('SeatStatusUpdated', (seatId: number, isBooked: boolean) => {
+      setSeats(prevSeats => prevSeats.map(s => s.id === seatId ? { ...s, isBooked } : s));
+    });
+
+    return () => {
+      conn.stop();
+    };
+  }, [eventId]);
 
   const handleBook = async (seatId: number) => {
     setBookingMsg('');
     try {
-      await bookSeat(Number(id), seatId);
+      await bookSeat(eventId, seatId);
       setBookingMsg('Seat booked successfully!');
       setSeats(seats.map(s => s.id === seatId ? { ...s, isBooked: true } : s));
     } catch {
@@ -102,4 +114,4 @@ const EventDetail: React.FC = () => {
   );
 };
 
-export default EventDetail; 
+export default EventDetail;
