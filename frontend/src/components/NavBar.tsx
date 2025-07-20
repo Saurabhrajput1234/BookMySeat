@@ -17,12 +17,14 @@ const NavBar: React.FC = () => {
 
   return (
     <AppBar position="static">
-      <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography variant="h6">
           <Button color="inherit" component={Link} to="/events">Events</Button>
+
           {token && (
             <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
           )}
+
           {user?.role === 'Admin' && (
             <>
               <Button color="inherit" component={Link} to="/admin">Admin</Button>
@@ -30,17 +32,20 @@ const NavBar: React.FC = () => {
             </>
           )}
         </Typography>
-        {token ? (
-          <Button color="inherit" onClick={handleLogout}>Logout</Button>
-        ) : (
-          <>
-            <Button color="inherit" component={Link} to="/login">Login</Button>
-            <Button color="inherit" component={Link} to="/signup">Sign Up</Button>
-          </>
-        )}
+
+        <div>
+          {token ? (
+            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+          ) : (
+            <>
+              <Button color="inherit" component={Link} to="/login">Login</Button>
+              <Button color="inherit" component={Link} to="/signup">Sign Up</Button>
+            </>
+          )}
+        </div>
       </Toolbar>
     </AppBar>
   );
 };
 
-export default NavBar; 
+export default NavBar;

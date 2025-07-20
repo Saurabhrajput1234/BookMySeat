@@ -8,7 +8,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,7 +17,11 @@ const Login: React.FC = () => {
     try {
       const res = await apiLogin(email, password);
       login(res.token);
-      navigate('/dashboard');
+      if (user?.role === 'Admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
     }
@@ -58,4 +62,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login; 
+export default Login;

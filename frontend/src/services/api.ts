@@ -1,88 +1,125 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5224/api'; // Change to your backend URL
+const API_URL = 'http://localhost:5224/api'; // ✅ Backend API URL
 
-export const signup = async (name: string, email: string, password: string) => {
-  const response = await axios.post(`${API_URL}/auth/register`, { name, email, password });
-  return response.data;
+// ✅ Create Axios instance
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// ✅ Add interceptor to attach JWT token to every request automatically
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+   console.log('Outgoing API request:', config.url, 'with token:', token);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// ===========================
+// ✅ AUTHENTICATION APIs
+// ===========================
+export const signup = async (name: string, email: string, password: string, role: string) => {
+  const response = await apiClient.post('/auth/register', { name, email, password, role });
+  return response.data; // Expected response: { token: string }
 };
 
 export const login = async (email: string, password: string) => {
-  const response = await axios.post(`${API_URL}/auth/login`, { email, password });
+  const response = await apiClient.post('/auth/login', { email, password });
+  return response.data; // Expected response: { token: string }
+};
+
+// ===========================
+// ✅ EVENT APIs
+// ===========================
+export const getAllEvents = async () => {
+  const response = await apiClient.get('/events');
   return response.data;
 };
 
 export const getEventById = async (id: number) => {
-  const response = await axios.get(`${API_URL}/events/${id}`);
-  return response.data;
-};
-
-export const getSeatsForEvent = async (eventId: number) => {
-  const response = await axios.get(`${API_URL}/seats/event/${eventId}`);
-  return response.data;
-};
-
-export const bookSeat = async (eventId: number, seatId: number) => {
-  const response = await axios.post(`${API_URL}/bookings/book`, { eventId, seatId });
-  return response.data;
-};
-
-export const getMyBookings = async () => {
-  const response = await axios.get(`${API_URL}/bookings/my`);
-  return response.data;
-};
-
-export const getAllEvents = async () => {
-  const response = await axios.get(`${API_URL}/events`);
+  const response = await apiClient.get(`/events/${id}`);
   return response.data;
 };
 
 export const createEvent = async (event: { name: string; description: string; date: string; location: string }) => {
-  const response = await axios.post(`${API_URL}/events`, event);
+  const response = await apiClient.post('/events', event);
   return response.data;
 };
 
 export const updateEvent = async (id: number, event: { name: string; description: string; date: string; location: string }) => {
-  const response = await axios.put(`${API_URL}/events/${id}`, event);
+  const response = await apiClient.put(`/events/${id}`, event);
   return response.data;
 };
 
 export const deleteEvent = async (id: number) => {
-  const response = await axios.delete(`${API_URL}/events/${id}`);
+  const response = await apiClient.delete(`/events/${id}`);
+  return response.data;
+};
+
+// ===========================
+// ✅ SEAT APIs
+// ===========================
+export const getSeatsForEvent = async (eventId: number) => {
+  const response = await apiClient.get(`/seats/event/${eventId}`);
   return response.data;
 };
 
 export const addSeatToEvent = async (eventId: number, seat: { row: string; number: number }) => {
-  const response = await axios.post(`${API_URL}/seats`, { eventId, ...seat });
+  const response = await apiClient.post('/seats', { eventId, ...seat });
   return response.data;
 };
 
 export const deleteSeat = async (seatId: number) => {
-  const response = await axios.delete(`${API_URL}/seats/${seatId}`);
+  const response = await apiClient.delete(`/seats/${seatId}`);
+  return response.data;
+};
+
+// ===========================
+// ✅ BOOKING APIs
+// ===========================
+export const bookSeat = async (eventId: number, seatId: number) => {
+  const response = await apiClient.post('/bookings/book', { eventId, seatId });
+  return response.data;
+};
+
+export const getMyBookings = async () => {
+  const response = await apiClient.get('/bookings/my');
   return response.data;
 };
 
 export const getBookingsForEvent = async (eventId: number) => {
-  const response = await axios.get(`${API_URL}/bookings/event/${eventId}`);
+  const response = await apiClient.get(`/bookings/event/${eventId}`);
   return response.data;
 };
 
 export const deleteBooking = async (bookingId: number) => {
-  const response = await axios.delete(`${API_URL}/bookings/${bookingId}`);
+  const response = await apiClient.delete(`/bookings/${bookingId}`);
   return response.data;
 };
 
+// ===========================
+// ✅ USER MANAGEMENT APIs (Admin Only)
+// ===========================
 export const getUsers = async () => {
-  const response = await axios.get(`${API_URL}/users`);
+  const response = await apiClient.get('/users');
   return response.data;
 };
 
 export const updateUserRole = async (id: number, role: string) => {
-  const response = await axios.put(`${API_URL}/users/${id}/role`, role, { headers: { 'Content-Type': 'application/json' } });
+  const response = await apiClient.put(`/users/${id}/role`, role, {
+    headers: { 'Content-Type': 'application/json' },
+  });
   return response.data;
 };
 
 export const toggleUserActive = async (id: number, isActive: boolean) => {
-  const response = await axios.put(`${API_URL}/users/${id}/active`, isActive, { headers: { 'Content-Type': 'application/json' } });
+  const response = await apiClient.put(`/users/${id}/active`, isActive, {
+    headers: { 'Content-Type': 'application/json' },
+  });
   return response.data;
-}; 
+};

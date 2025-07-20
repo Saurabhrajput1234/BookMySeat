@@ -1,9 +1,22 @@
 import { createContext, useState, useContext } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import type { ReactNode } from 'react';
-import { jwtDecode } from 'jwt-decode'; // ✅ Corrected import
+
+interface DecodedToken {
+  name?: string;
+  email?: string;
+  exp: number;
+  [key: string]: any; // handle dynamic keys like role claim
+}
+
+interface User {
+  name?: string;
+  email?: string;
+  role: string;
+}
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   token: string | null;
   login: (token: string) => void;
   logout: () => void;
@@ -13,20 +26,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-  const [user, setUser] = useState<any>(() => {
-    const t = localStorage.getItem('token');
-    return t ? jwtDecode(t) : null;
-  });
+
+  const getUserFromToken = (t: string | null): User | null => {
+    if (!t) return null;
+    const decoded: DecodedToken = jwtDecode(t);
+    const role = decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || 'User';
+    return {
+      name: decoded.name || '',
+      email: decoded.email || '',
+      role,
+    };
+  };
+
+  const [user, setUser] = useState<User | null>(() => getUserFromToken(token));
 
   const login = (newToken: string) => {
-    setToken(newToken);
     localStorage.setItem('token', newToken);
-    setUser(jwtDecode(newToken));
+    setToken(newToken);
+    setUser(getUserFromToken(newToken));
   };
 
   const logout = () => {
-    setToken(null);
     localStorage.removeItem('token');
+    setToken(null);
     setUser(null);
   };
 
