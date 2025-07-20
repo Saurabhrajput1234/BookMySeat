@@ -10,29 +10,82 @@ namespace EventBookingAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // ✅ Admin only
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+
         public UsersController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/users
+        // ✅ GET: api/users - List all users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<object>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name,
+                    u.Email,
+                    u.Role,
+                    u.IsActive
+                })
+                .ToListAsync();
+
+            return Ok(users);
         }
 
-        // GET: api/users/{id}
+        // ✅ GET: api/users/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<object>> GetUser(int id)
+        {
+            var user = await _context.Users
+                .Where(u => u.Id == id)
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Name,
+                    u.Email,
+                    u.Role,
+                    u.IsActive
+                })
+                .FirstOrDefaultAsync();
+
+            if (user == null) return NotFound(new { message = "User not found" });
+
+            return Ok(user);
+        }
+
+        // ✅ PUT: api/users/{id}/role - Update user role
+        [HttpPut("{id}/role")]
+        public async Task<IActionResult> UpdateUserRole(int id, [FromBody] string newRole)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
-            return user;
+            if (user == null) return NotFound(new { message = "User not found" });
+
+            if (newRole != "Admin" && newRole != "User")
+                return BadRequest(new { message = "Invalid role" });
+
+            user.Role = newRole;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User role updated successfully" });
+        }
+
+        // ✅ PUT: api/users/{id}/active - Toggle user active/inactive
+        [HttpPut("{id}/active")]
+        public async Task<IActionResult> ToggleUserActive(int id, [FromBody] bool isActive)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound(new { message = "User not found" });
+
+            user.IsActive = isActive;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User status updated successfully" });
         }
     }
-} 
+}

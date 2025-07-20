@@ -21,13 +21,13 @@ namespace EventBookingAPI.Services
             var jwtSettings = _configuration.GetSection("Jwt");
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["ExpiresInMinutes"]));
+            var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpiresInMinutes"]));
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", user.Role), // ✅ Correct role claim
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -42,4 +42,4 @@ namespace EventBookingAPI.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
-} 
+}

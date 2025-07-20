@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\.net\\backend\\EventBookingAPI.csproj": {}
+    "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\BookMySeat\\EventBookingAPI\\EventBookingAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\.net\\backend\\EventBookingAPI.csproj": {
+    "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\BookMySeat\\EventBookingAPI\\EventBookingAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\.net\\backend\\EventBookingAPI.csproj",
+        "projectUniqueName": "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\BookMySeat\\EventBookingAPI\\EventBookingAPI.csproj",
         "projectName": "EventBookingAPI",
-        "projectPath": "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\.net\\backend\\EventBookingAPI.csproj",
+        "projectPath": "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\BookMySeat\\EventBookingAPI\\EventBookingAPI.csproj",
         "packagesPath": "C:\\Users\\saura\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\.net\\backend\\obj\\",
+        "outputPath": "C:\\Users\\saura\\OneDrive\\Desktop\\React Course\\BookMySeat\\EventBookingAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

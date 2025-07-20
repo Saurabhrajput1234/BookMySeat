@@ -1,18 +1,17 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace EventBookingAPI.Models
 {
     public class User
     {
-        [Key]
         public int Id { get; set; }
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        public string Email { get; set; }
-        [Required]
-        public string PasswordHash { get; set; }
-        [Required]
-        public string Role { get; set; } // "Admin" or "User"
+
+        public string Name { get; set; } = string.Empty;
+
+        public string Email { get; set; } = string.Empty;
+
+        public string PasswordHash { get; set; } = string.Empty;
+
+        public string Role { get; set; } = "User"; // Default role is User
+
+        public bool IsActive { get; set; } = true; // ✅ New property
     }
-} 
+}
