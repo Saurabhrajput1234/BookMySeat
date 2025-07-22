@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Typography, CircularProgress, Box, Button, Alert } from '@mui/material';
+import {
+  Container,
+  Typography,
+  CircularProgress,
+  Box,
+  Button,
+  Alert,
+  Card,
+  CardContent
+} from '@mui/material';
 import { getEventById, getSeatsForEvent, bookSeat } from '../services/api';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
@@ -61,7 +70,9 @@ const EventDetail: React.FC = () => {
       .catch(err => console.error('SignalR Connection Error:', err));
 
     conn.on('SeatStatusUpdated', (seatId: number, isBooked: boolean) => {
-      setSeats(prevSeats => prevSeats.map(s => s.id === seatId ? { ...s, isBooked } : s));
+      setSeats(prevSeats =>
+        prevSeats.map(s => (s.id === seatId ? { ...s, isBooked } : s))
+      );
     });
 
     return () => {
@@ -74,46 +85,128 @@ const EventDetail: React.FC = () => {
     try {
       await bookSeat(eventId, seatId);
       setBookingMsg('Seat booked successfully!');
-      setSeats(seats.map(s => s.id === seatId ? { ...s, isBooked: true } : s));
+      setSeats(seats.map(s => (s.id === seatId ? { ...s, isBooked: true } : s)));
     } catch {
       setBookingMsg('Booking failed.');
     }
   };
 
-  if (loading) return <CircularProgress />;
-  if (!event) return <Typography>Event not found.</Typography>;
+  if (loading)
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+        <CircularProgress sx={{ color: '#d4af37' }} />
+      </Box>
+    );
+
+  if (!event)
+    return (
+      <Typography variant="h6" sx={{ textAlign: 'center', mt: 4 }}>
+        Event not found.
+      </Typography>
+    );
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mt: 4 }}>{event.name}</Typography>
-      <Box sx={{ mt: 2 }}>
-        <Typography>Date: {event.date}</Typography>
-        <Typography>Location: {event.location}</Typography>
-        <Typography>Description: {event.description}</Typography>
-      </Box>
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>Seats</Typography>
-        {bookingMsg && <Alert severity="info" sx={{ mt: 2 }}>{bookingMsg}</Alert>}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-          {seats.map(seat => (
-            <Box
-              key={seat.id}
-              sx={{
-                width: { xs: '100%', sm: '48%', md: '23%' }, // responsive layout
-              }}
-            >
-              <Button
-                fullWidth
-                variant={seat.isBooked ? 'outlined' : 'contained'}
-                color={seat.isBooked ? 'secondary' : 'primary'}
-                disabled={seat.isBooked}
-                onClick={() => handleBook(seat.id)}
-              >
-                Row {seat.row} - #{seat.number}
-              </Button>
-            </Box>
-          ))}
-        </Box>
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      {/* Event Card */}
+      <Card
+        sx={{
+          bgcolor: '#000',
+          color: '#fff',
+          border: '1px solid #d4af37',
+          borderRadius: 3,
+          p: 3,
+          mb: 5
+        }}
+      >
+        <CardContent>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              mb: 2,
+              color: '#d4af37',
+              textAlign: 'center'
+            }}
+          >
+            {event.name}
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ mb: 1, textAlign: 'center', color: '#ccc' }}
+          >
+            {new Date(event.date).toLocaleDateString()} | {event.location}
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              mt: 2,
+              textAlign: 'center',
+              color: '#e4e4e4',
+              fontSize: '1.1rem'
+            }}
+          >
+            {event.description}
+          </Typography>
+        </CardContent>
+      </Card>
+
+      {/* Seats Section */}
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 3,
+          textAlign: 'center',
+          fontWeight: 700,
+          color: '#d4af37'
+        }}
+      >
+        Available Seats
+      </Typography>
+
+      {bookingMsg && (
+        <Alert
+          severity="info"
+          sx={{
+            mb: 3,
+            textAlign: 'center',
+            fontWeight: 600,
+            bgcolor: '#fffbe6'
+          }}
+        >
+          {bookingMsg}
+        </Alert>
+      )}
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
+          justifyContent: 'center'
+        }}
+      >
+        {seats.map(seat => (
+          <Button
+            key={seat.id}
+            fullWidth
+            sx={{
+              maxWidth: '150px',
+              bgcolor: seat.isBooked ? '#333' : '#d4af37',
+              color: seat.isBooked ? '#999' : '#000',
+              fontWeight: 600,
+              borderRadius: '8px',
+              textTransform: 'none',
+              border: seat.isBooked ? '1px solid #777' : '1px solid #d4af37',
+              '&:hover': {
+                bgcolor: seat.isBooked ? '#333' : '#b58e2b'
+              }
+            }}
+            disabled={seat.isBooked}
+            onClick={() => handleBook(seat.id)}
+          >
+            Row {seat.row} - #{seat.number}
+          </Button>
+        ))}
       </Box>
     </Container>
   );

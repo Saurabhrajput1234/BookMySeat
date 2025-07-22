@@ -34,7 +34,13 @@ const Signup: React.FC = () => {
   return (
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">Sign Up</Typography>
+        <Typography
+          component="h1"
+          variant="h5"
+          sx={{ color: '#d4af37', fontWeight: 'bold' }}
+        >
+          Sign Up
+        </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -44,6 +50,15 @@ const Signup: React.FC = () => {
             value={name}
             onChange={e => setName(e.target.value)}
             autoFocus
+            InputLabelProps={{ style: { color: '#d4af37' } }}
+            InputProps={{ style: { color: '#000' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#d4af37' },
+                '&:hover fieldset': { borderColor: '#b38f1d' },
+                '&.Mui-focused fieldset': { borderColor: '#d4af37' }
+              }
+            }}
           />
           <TextField
             margin="normal"
@@ -53,6 +68,15 @@ const Signup: React.FC = () => {
             value={email}
             onChange={e => setEmail(e.target.value)}
             autoComplete="email"
+            InputLabelProps={{ style: { color: '#d4af37' } }}
+            InputProps={{ style: { color: '#000' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#d4af37' },
+                '&:hover fieldset': { borderColor: '#b38f1d' },
+                '&.Mui-focused fieldset': { borderColor: '#d4af37' }
+              }
+            }}
           />
           <TextField
             margin="normal"
@@ -63,6 +87,15 @@ const Signup: React.FC = () => {
             value={password}
             onChange={e => setPassword(e.target.value)}
             autoComplete="new-password"
+            InputLabelProps={{ style: { color: '#d4af37' } }}
+            InputProps={{ style: { color: '#000' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#d4af37' },
+                '&:hover fieldset': { borderColor: '#b38f1d' },
+                '&.Mui-focused fieldset': { borderColor: '#d4af37' }
+              }
+            }}
           />
           <TextField
             select
@@ -70,14 +103,41 @@ const Signup: React.FC = () => {
             label="Role"
             value={role}
             onChange={e => setRole(e.target.value)}
-            sx={{ mt: 2 }}
+            sx={{
+              mt: 2,
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#d4af37' },
+                '&:hover fieldset': { borderColor: '#b38f1d' },
+                '&.Mui-focused fieldset': { borderColor: '#d4af37' }
+              }
+            }}
+            InputLabelProps={{ style: { color: '#d4af37' } }}
+            InputProps={{ style: { color: '#000' } }}
           >
             {roles.map(r => (
-              <MenuItem key={r} value={r}>{r}</MenuItem>
+              <MenuItem key={r} value={r}>
+                {r}
+              </MenuItem>
             ))}
           </TextField>
-          {error && <Alert severity="error">{error}</Alert>}
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              bgcolor: '#d4af37',
+              color: '#000',
+              fontWeight: 'bold',
+              '&:hover': { bgcolor: '#b38f1d' }
+            }}
+          >
             Sign Up
           </Button>
         </Box>

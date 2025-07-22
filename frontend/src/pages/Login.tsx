@@ -8,7 +8,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,17 +16,12 @@ const Login: React.FC = () => {
     setError('');
     try {
       const res = await apiLogin(email, password);
-      console.log('Received token from backend:', res.token);
       if (!res.token || typeof res.token !== 'string' || !res.token.includes('.')) {
         setError('Received invalid token from backend.');
         return;
       }
       login(res.token);
-      if (res.role === 'Admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      navigate(res.role === 'Admin' ? '/admin' : '/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
     }
@@ -35,7 +30,13 @@ const Login: React.FC = () => {
   return (
     <Container maxWidth="xs">
       <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">Login</Typography>
+        <Typography
+          component="h1"
+          variant="h5"
+          sx={{ color: '#d4af37', fontWeight: 'bold' }}
+        >
+          Login
+        </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -46,6 +47,15 @@ const Login: React.FC = () => {
             onChange={e => setEmail(e.target.value)}
             autoComplete="email"
             autoFocus
+            InputLabelProps={{ style: { color: '#d4af37' } }}
+            InputProps={{ style: { color: '#000' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#d4af37' },
+                '&:hover fieldset': { borderColor: '#b38f1d' },
+                '&.Mui-focused fieldset': { borderColor: '#d4af37' }
+              }
+            }}
           />
           <TextField
             margin="normal"
@@ -56,9 +66,34 @@ const Login: React.FC = () => {
             value={password}
             onChange={e => setPassword(e.target.value)}
             autoComplete="current-password"
+            InputLabelProps={{ style: { color: '#d4af37' } }}
+            InputProps={{ style: { color: '#000' } }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: '#d4af37' },
+                '&:hover fieldset': { borderColor: '#b38f1d' },
+                '&.Mui-focused fieldset': { borderColor: '#d4af37' }
+              }
+            }}
           />
-          {error && <Alert severity="error">{error}</Alert>}
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              bgcolor: '#d4af37',
+              color: '#000',
+              fontWeight: 'bold',
+              '&:hover': { bgcolor: '#b38f1d' }
+            }}
+          >
             Login
           </Button>
         </Box>

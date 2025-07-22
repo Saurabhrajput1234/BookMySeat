@@ -15,12 +15,13 @@ import {
   DialogContentText,
   DialogActions,
   Snackbar,
-  TextField
+  TextField,
+  Divider,
+  Paper
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import EventCreateForm from '../components/EventCreateForm';
-
 import {
   getAllEvents,
   deleteEvent,
@@ -67,13 +68,12 @@ const Admin: React.FC = () => {
   const [newSeatNumber, setNewSeatNumber] = useState<Record<number, string>>({});
   const [addingSeat, setAddingSeat] = useState<Record<number, boolean>>({});
 
-  // ✅ Fetch all events
   const fetchEvents = async () => {
     setLoading(true);
     try {
       const data = await getAllEvents();
       setEvents(data);
-    } catch (error: any) {
+    } catch {
       setSnackbarMsg('Failed to load events');
       setSnackbarOpen(true);
     }
@@ -84,7 +84,6 @@ const Admin: React.FC = () => {
     fetchEvents();
   }, []);
 
-  // ✅ Expand/Collapse Event
   const toggleExpand = async (eventId: number) => {
     if (expandedEvent === eventId) {
       setExpandedEvent(null);
@@ -106,7 +105,6 @@ const Admin: React.FC = () => {
     }
   };
 
-  // ✅ Delete Confirm Dialog
   const handleDelete = (msg: string, confirmAction: () => void) => {
     setDialogMessage(msg);
     setOnConfirm(() => confirmAction);
@@ -118,7 +116,6 @@ const Admin: React.FC = () => {
     setDialogOpen(false);
   };
 
-  // ✅ Add Seat with better error handling
   const handleAddSeat = async (eventId: number) => {
     const row = newSeatRow[eventId];
     const number = Number(newSeatNumber[eventId]);
@@ -134,35 +131,57 @@ const Admin: React.FC = () => {
       await addSeat(eventId, { row, number });
       setNewSeatRow(prev => ({ ...prev, [eventId]: '' }));
       setNewSeatNumber(prev => ({ ...prev, [eventId]: '' }));
-      await fetchEventDetails(eventId); // ✅ Refresh without collapsing
+      await fetchEventDetails(eventId);
       setSnackbarMsg('Seat added successfully');
-    } catch (error: any) {
-      setSnackbarMsg(error.response?.data || 'Failed to add seat');
+    } catch {
+      setSnackbarMsg('Failed to add seat');
     }
     setSnackbarOpen(true);
     setAddingSeat(prev => ({ ...prev, [eventId]: false }));
   };
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mt: 4 }}>Admin Panel</Typography>
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Typography variant="h4" sx={{ color: '#d4af37', fontWeight: 'bold', mb: 3 }}>
+        Admin Panel
+      </Typography>
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-          <CircularProgress />
+          <CircularProgress sx={{ color: '#d4af37' }} />
         </Box>
       ) : (
-        <List sx={{ mt: 4 }}>
-          {events.map(event => (
-            <React.Fragment key={event.id}>
-              <ListItem
-                secondaryAction={
-                  <>
-                    <IconButton onClick={() => toggleExpand(event.id)}>
+        <Paper elevation={3} sx={{ p: 3, bgcolor: '#1c1c1c', borderRadius: 3 }}>
+          <List>
+            {events.map(event => (
+              <React.Fragment key={event.id}>
+                <ListItem
+                  sx={{
+                    bgcolor: '#2a2a2a',
+                    mb: 2,
+                    borderRadius: 2,
+                    color: '#fff',
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <ListItemText
+                    primary={event.name}
+                    secondary={event.date}
+                    primaryTypographyProps={{ fontWeight: 600, color: '#d4af37' }}
+                    secondaryTypographyProps={{ color: '#bbb' }}
+                  />
+                  <Box>
+                    <IconButton onClick={() => toggleExpand(event.id)} sx={{ color: '#d4af37' }}>
                       {expandedEvent === event.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </IconButton>
                     <Button
                       variant="contained"
-                      color="error"
+                      sx={{
+                        ml: 2,
+                        bgcolor: '#b22222',
+                        '&:hover': { bgcolor: '#8b0000' }
+                      }}
                       onClick={() =>
                         handleDelete('Delete this event?', async () => {
                           await deleteEvent(event.id);
@@ -172,90 +191,121 @@ const Admin: React.FC = () => {
                     >
                       Delete
                     </Button>
-                  </>
-                }
-              >
-                <ListItemText primary={event.name} secondary={event.date} />
-              </ListItem>
-
-              {expandedEvent === event.id && (
-                <Box sx={{ pl: 4, pb: 2 }}>
-                  <Typography variant="h6">Seats</Typography>
-
-                  {/* Add Seat Form */}
-                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2 }}>
-                    <TextField
-                      label="Row"
-                      value={newSeatRow[event.id] || ''}
-                      onChange={e => setNewSeatRow(prev => ({ ...prev, [event.id]: e.target.value }))}
-                      size="small"
-                    />
-                    <TextField
-                      label="Number"
-                      type="number"
-                      value={newSeatNumber[event.id] || ''}
-                      onChange={e => setNewSeatNumber(prev => ({ ...prev, [event.id]: e.target.value }))}
-                      size="small"
-                    />
-                    <Button
-                      variant="contained"
-                      onClick={() => handleAddSeat(event.id)}
-                      disabled={addingSeat[event.id]}
-                    >
-                      {addingSeat[event.id] ? 'Adding...' : 'Add Seat'}
-                    </Button>
                   </Box>
+                </ListItem>
 
-                  {/* Seat List */}
-                  {seats[event.id]?.map(seat => (
-                    <Box key={seat.id} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                      <Typography>
-                        Row {seat.row} - #{seat.number}
-                      </Typography>
+                {expandedEvent === event.id && (
+                  <Box sx={{ pl: 2, py: 2, bgcolor: '#2f2f2f', borderRadius: 2, mb: 2 }}>
+                    <Typography variant="h6" sx={{ color: '#d4af37', mb: 2 }}>
+                      Seats
+                    </Typography>
+
+                    {/* Add Seat */}
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      <TextField
+                        label="Row"
+                        value={newSeatRow[event.id] || ''}
+                        onChange={e => setNewSeatRow(prev => ({ ...prev, [event.id]: e.target.value }))}
+                        size="small"
+                        sx={{
+                          input: { color: '#fff' },
+                          label: { color: '#d4af37' },
+                          '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
+                        }}
+                      />
+                      <TextField
+                        label="Number"
+                        type="number"
+                        value={newSeatNumber[event.id] || ''}
+                        onChange={e => setNewSeatNumber(prev => ({ ...prev, [event.id]: e.target.value }))}
+                        size="small"
+                        sx={{
+                          input: { color: '#fff' },
+                          label: { color: '#d4af37' },
+                          '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
+                        }}
+                      />
                       <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={() =>
-                          handleDelete('Delete this seat?', async () => {
-                            await deleteSeat(seat.id);
-                            fetchEventDetails(event.id);
-                          })
-                        }
+                        variant="contained"
+                        sx={{
+                          bgcolor: '#d4af37',
+                          color: '#000',
+                          fontWeight: 'bold',
+                          '&:hover': { bgcolor: '#b38f1d' }
+                        }}
+                        onClick={() => handleAddSeat(event.id)}
+                        disabled={addingSeat[event.id]}
                       >
-                        Delete
+                        {addingSeat[event.id] ? 'Adding...' : 'Add Seat'}
                       </Button>
                     </Box>
-                  ))}
 
-                  {/* Bookings */}
-                  <Typography variant="h6" sx={{ mt: 2 }}>Bookings</Typography>
-                  {bookings[event.id]?.map(booking => (
-                    <Box key={booking.id} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                      <Typography>
-                        {booking.userName} (Seat #{booking.seatId})
-                      </Typography>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        onClick={() =>
-                          handleDelete('Delete this booking?', async () => {
-                            await deleteBooking(booking.id);
-                            fetchEventDetails(event.id);
-                          })
-                        }
+                    {seats[event.id]?.map(seat => (
+                      <Box
+                        key={seat.id}
+                        sx={{ display: 'flex', justifyContent: 'space-between', color: '#fff', mb: 1 }}
                       >
-                        Delete
-                      </Button>
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </React.Fragment>
-          ))}
-        </List>
+                        <Typography>
+                          Row {seat.row} - #{seat.number}
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          sx={{
+                            borderColor: '#b22222',
+                            color: '#b22222',
+                            '&:hover': { borderColor: '#8b0000', color: '#8b0000' }
+                          }}
+                          onClick={() =>
+                            handleDelete('Delete this seat?', async () => {
+                              await deleteSeat(seat.id);
+                              fetchEventDetails(event.id);
+                            })
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    ))}
+
+                    <Divider sx={{ my: 2, borderColor: '#444' }} />
+
+                    <Typography variant="h6" sx={{ color: '#d4af37', mb: 1 }}>
+                      Bookings
+                    </Typography>
+                    {bookings[event.id]?.map(booking => (
+                      <Box
+                        key={booking.id}
+                        sx={{ display: 'flex', justifyContent: 'space-between', color: '#fff', mb: 1 }}
+                      >
+                        <Typography>
+                          {booking.userName} (Seat #{booking.seatId})
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          sx={{
+                            borderColor: '#b22222',
+                            color: '#b22222',
+                            '&:hover': { borderColor: '#8b0000', color: '#8b0000' }
+                          }}
+                          onClick={() =>
+                            handleDelete('Delete this booking?', async () => {
+                              await deleteBooking(booking.id);
+                              fetchEventDetails(event.id);
+                            })
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+              </React.Fragment>
+            ))}
+          </List>
+        </Paper>
       )}
 
-      {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
@@ -263,11 +313,12 @@ const Admin: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmAction} color="primary">Confirm</Button>
+          <Button onClick={confirmAction} sx={{ color: '#d4af37' }}>
+            Confirm
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -276,8 +327,9 @@ const Admin: React.FC = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
 
-      {/* Event Create Form */}
-      <EventCreateForm onEventCreated={fetchEvents} />
+      {/* <Box sx={{ mt: 4 }}>
+        <EventCreateForm onEventCreated={fetchEvents} />
+      </Box> */}
     </Container>
   );
 };

@@ -16,30 +16,125 @@ const NavBar: React.FC = () => {
   };
 
   return (
-    <AppBar position="static">
+    <AppBar
+      position="static"
+      sx={{
+        bgcolor: '#000', 
+        color: '#d4af37', 
+        boxShadow: 'none',
+      }}
+    >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="h6">
-          <Button color="inherit" component={Link} to="/events">Events</Button>
+        <Typography variant="h6" sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            sx={{
+              color: '#d4af37',
+              fontWeight: 600,
+              textTransform: 'none',
+              '&:hover': { color: '#b58e2b' }, 
+            }}
+            component={Link}
+            to="/events"
+          >
+            Events
+          </Button>
 
-          {token && (
-            <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
+          {token && user?.role === 'User' && (
+            <Button
+              sx={{
+                color: '#d4af37',
+                fontWeight: 600,
+                textTransform: 'none',
+                '&:hover': { color: '#b58e2b' },
+              }}
+              component={Link}
+              to="/dashboard"
+            >
+              Dashboard
+            </Button>
           )}
 
           {user?.role === 'Admin' && (
             <>
-              <Button color="inherit" component={Link} to="/admin">Admin</Button>
-              <Button color="inherit" component={Link} to="/admin/users">Users</Button>
+              <Button
+                sx={{
+                  color: '#d4af37',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': { color: '#b58e2b' },
+                }}
+                component={Link}
+                to="/admin"
+              >
+                Admin
+              </Button>
+              <Button
+                sx={{
+                  color: '#d4af37',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': { color: '#b58e2b' },
+                }}
+                component={Link}
+                to="/admin/users"
+              >
+                Users
+              </Button>
+              <Button
+                sx={{
+                  color: '#d4af37',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': { color: '#b58e2b' },
+                }}
+                component={Link}
+                to="/events/create"
+              >
+                Create Event
+              </Button>
             </>
           )}
         </Typography>
 
         <div>
           {token ? (
-            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+            <Button
+              sx={{
+                color: '#d4af37',
+                fontWeight: 600,
+                textTransform: 'none',
+                '&:hover': { color: '#b58e2b' },
+              }}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
           ) : (
             <>
-              <Button color="inherit" component={Link} to="/login">Login</Button>
-              <Button color="inherit" component={Link} to="/signup">Sign Up</Button>
+              <Button
+                sx={{
+                  color: '#d4af37',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': { color: '#b58e2b' },
+                }}
+                component={Link}
+                to="/login"
+              >
+                Login
+              </Button>
+              <Button
+                sx={{
+                  color: '#d4af37',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  '&:hover': { color: '#b58e2b' },
+                }}
+                component={Link}
+                to="/signup"
+              >
+                Sign Up
+              </Button>
             </>
           )}
         </div>

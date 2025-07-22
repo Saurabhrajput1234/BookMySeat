@@ -6,7 +6,7 @@ interface DecodedToken {
   name?: string;
   email?: string;
   exp: number;
-  [key: string]: any; // handle dynamic keys like role claim
+  [key: string]: any; 
 }
 
 interface User {

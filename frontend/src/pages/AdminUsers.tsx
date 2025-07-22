@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
-import Alert from '@mui/material/Alert';
-import CircularProgress from '@mui/material/CircularProgress';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
-import Snackbar from '@mui/material/Snackbar';
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Alert,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Box
+} from '@mui/material';
 import { getUsers, updateUserRole, toggleUserActive } from '../services/api';
-import Box from '@mui/material/Box';
 
 interface User {
   id: number;
@@ -73,18 +75,14 @@ const AdminUsers: React.FC = () => {
   const handleRoleChange = async () => {
     if (!selectedUser) return;
     setActionLoading(true);
-    setError('');
-    setSuccess('');
     const newRole = selectedUser.role === 'Admin' ? 'User' : 'Admin';
     try {
       await updateUserRole(selectedUser.id, JSON.stringify(newRole));
-      setSuccess('User role updated.');
       setSnackbarMsg('User role updated.');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
       fetchUsers();
     } catch {
-      setError('Failed to update user role.');
       setSnackbarMsg('Failed to update user role.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
@@ -96,17 +94,13 @@ const AdminUsers: React.FC = () => {
   const handleActiveToggle = async () => {
     if (!selectedUser) return;
     setActionLoading(true);
-    setError('');
-    setSuccess('');
     try {
       await toggleUserActive(selectedUser.id, !selectedUser.isActive);
-      setSuccess(selectedUser.isActive ? 'User deactivated.' : 'User activated.');
       setSnackbarMsg(selectedUser.isActive ? 'User deactivated.' : 'User activated.');
       setSnackbarSeverity('success');
       setSnackbarOpen(true);
       fetchUsers();
     } catch {
-      setError('Failed to update user status.');
       setSnackbarMsg('Failed to update user status.');
       setSnackbarSeverity('error');
       setSnackbarOpen(true);
@@ -117,52 +111,71 @@ const AdminUsers: React.FC = () => {
 
   return (
     <Container>
-      <Typography variant="h4" sx={{ mt: 4 }}>User Management</Typography>
+      <Typography variant="h4" sx={{ mt: 4, color: '#d4af37', fontWeight: 'bold' }}>
+        User Management
+      </Typography>
+
       {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
       {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
+
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
           <CircularProgress />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ mt: 4 }}>
+        <TableContainer component={Paper} sx={{ mt: 4, borderRadius: 2, boxShadow: 3 }}>
           <Table>
-            <TableHead>
+            <TableHead sx={{ backgroundColor: '#d4af37' }}>
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Actions</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Email</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Role</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {users.map(user => (
-                <TableRow key={user.id}>
+                <TableRow key={user.id} hover>
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role}</TableCell>
-                  <TableCell>{user.isActive ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell sx={{ color: user.isActive ? '#4caf50' : '#f44336' }}>
+                    {user.isActive ? 'Active' : 'Inactive'}
+                  </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outlined"
-                      color={user.role === 'Admin' ? 'secondary' : 'primary'}
-                      size="small"
-                      onClick={() => handleDialogOpen(user, 'role')}
-                      sx={{ mr: 1 }}
-                      disabled={actionLoading}
-                    >
-                      {user.role === 'Admin' ? 'Demote to User' : 'Promote to Admin'}
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color={user.isActive ? 'error' : 'success'}
-                      size="small"
-                      onClick={() => handleDialogOpen(user, 'active')}
-                      disabled={actionLoading}
-                    >
-                      {user.isActive ? 'Deactivate' : 'Activate'}
-                    </Button>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      <Button
+                        variant="outlined"
+                        sx={{
+                          borderColor: '#d4af37',
+                          color: '#d4af37',
+                          width: '140px',
+                          fontSize: '0.8rem',
+                          '&:hover': { backgroundColor: '#d4af37', color: '#fff' }
+                        }}
+                        size="small"
+                        onClick={() => handleDialogOpen(user, 'role')}
+                        disabled={actionLoading}
+                      >
+                        {user.role === 'Admin' ? 'Demote' : 'Promote'}
+                      </Button>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: user.isActive ? '#f44336' : '#4caf50',
+                          color: '#fff',
+                          width: '140px',
+                          fontSize: '0.8rem',
+                          '&:hover': { opacity: 0.9 }
+                        }}
+                        size="small"
+                        onClick={() => handleDialogOpen(user, 'active')}
+                        disabled={actionLoading}
+                      >
+                        {user.isActive ? 'Deactivate' : 'Activate'}
+                      </Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
@@ -170,6 +183,7 @@ const AdminUsers: React.FC = () => {
           </Table>
         </TableContainer>
       )}
+
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
@@ -188,18 +202,19 @@ const AdminUsers: React.FC = () => {
           {dialogAction === 'active' && <Button onClick={handleActiveToggle} color="primary" disabled={actionLoading}>Confirm</Button>}
         </DialogActions>
       </Dialog>
+
       <Snackbar
-  open={snackbarOpen}
-  autoHideDuration={3000}
-  onClose={() => setSnackbarOpen(false)}
-  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
->
-  <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
-    {snackbarMsg}
-  </Alert>
-</Snackbar>
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
 
-export default AdminUsers; 
+export default AdminUsers;

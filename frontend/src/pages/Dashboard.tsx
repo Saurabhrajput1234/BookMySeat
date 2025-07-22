@@ -3,10 +3,10 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import Alert from '@mui/material/Alert';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Divider from '@mui/material/Divider';
 import { getMyBookings } from '../services/api';
 
 interface Booking {
@@ -35,32 +35,98 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mt: 4 }}>User Dashboard</Typography>
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6">My Bookings</Typography>
-        {loading && <CircularProgress />}
-        {error && <Alert severity="error">{error}</Alert>}
-        {!loading && !error && (
-          <List>
-            {bookings.length === 0 && (
-              <ListItem>
-                <ListItemText primary="No bookings found." />
-              </ListItem>
-            )}
-            {bookings.map(booking => (
-              <ListItem key={booking.id}>
-                <ListItemText
-                  primary={`${booking.event.name} - Row ${booking.seat.row} #${booking.seat.number}`}
-                  secondary={`Date: ${booking.event.date} | Location: ${booking.event.location} | Status: ${booking.paymentStatus} | Booked at: ${new Date(booking.bookingTime).toLocaleString()}`}
-                />
-              </ListItem>
-            ))}
-          </List>
+    <Container maxWidth="md" sx={{ py: 6 }}>
+      <Typography
+        variant="h3"
+        sx={{
+          fontWeight: 700,
+          mb: 4,
+          textAlign: 'center',
+          color: '#d4af37'
+        }}
+      >
+        User Dashboard
+      </Typography>
+
+      <Box sx={{ mb: 3 }}>
+        <Typography
+          variant="h5"
+          sx={{ mb: 2, color: '#d4af37', fontWeight: 600 }}
+        >
+          My Bookings
+        </Typography>
+
+        {loading && (
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <CircularProgress sx={{ color: '#d4af37' }} />
+          </Box>
         )}
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {!loading && !error && bookings.length === 0 && (
+          <Alert
+            severity="info"
+            sx={{ bgcolor: '#fffbe6', color: '#000', fontWeight: 500 }}
+          >
+            No bookings found.
+          </Alert>
+        )}
+
+        {!loading &&
+          !error &&
+          bookings.map(booking => (
+            <Card
+              key={booking.id}
+              sx={{
+                mb: 3,
+                bgcolor: '#000',
+                color: '#fff',
+                border: '1px solid #d4af37',
+                borderRadius: 3,
+                boxShadow: '0px 4px 12px rgba(0,0,0,0.4)'
+              }}
+            >
+              <CardContent>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 700,
+                    color: '#d4af37',
+                    mb: 1
+                  }}
+                >
+                  {booking.event.name}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ color: '#ccc', mb: 1 }}
+                >
+                  Seat: Row {booking.seat.row} - #{booking.seat.number}
+                </Typography>
+                <Divider sx={{ borderColor: '#333', my: 1 }} />
+                <Typography variant="body2" sx={{ color: '#bbb' }}>
+                  Date: {booking.event.date}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#bbb' }}>
+                  Location: {booking.event.location}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#bbb' }}>
+                  Status: {booking.paymentStatus}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#bbb' }}>
+                  Booked At: {new Date(booking.bookingTime).toLocaleString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
       </Box>
     </Container>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

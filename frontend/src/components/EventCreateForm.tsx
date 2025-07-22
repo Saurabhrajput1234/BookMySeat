@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Snackbar } from '@mui/material';
+import { Box, Button, TextField, Typography, Snackbar, Paper } from '@mui/material';
 import { createEvent } from '../services/api';
 
 interface EventCreateFormProps {
@@ -19,7 +19,6 @@ const EventCreateForm: React.FC<EventCreateFormProps> = ({ onEventCreated }) => 
     e.preventDefault();
     setLoading(true);
     try {
-      // Convert date string to ISO format for backend compatibility
       const isoDate = date ? new Date(date).toISOString() : '';
       await createEvent({ name, description, date: isoDate, location });
       setSnackbarMsg('Event created successfully!');
@@ -41,46 +40,100 @@ const EventCreateForm: React.FC<EventCreateFormProps> = ({ onEventCreated }) => 
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4, mb: 4, maxWidth: 400 }}>
-      <Typography variant="h6" sx={{ mb: 2 }}>Create New Event</Typography>
-      <TextField
-        label="Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        fullWidth
-        required
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        label="Description"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-        fullWidth
-        multiline
-        rows={3}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        label="Date"
-        type="datetime-local"
-        value={date}
-        onChange={e => setDate(e.target.value)}
-        fullWidth
-        required
-        InputLabelProps={{ shrink: true }}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        label="Location"
-        value={location}
-        onChange={e => setLocation(e.target.value)}
-        fullWidth
-        required
-        sx={{ mb: 2 }}
-      />
-      <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
-        {loading ? 'Creating...' : 'Create Event'}
-      </Button>
+    <Paper
+      elevation={3}
+      sx={{
+        mt: 4,
+        p: 3,
+        maxWidth: 450,
+        borderRadius: 3,
+        bgcolor: '#1c1c1c',
+        color: '#fff'
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          mb: 3,
+          fontWeight: 'bold',
+          color: '#d4af37',
+          textAlign: 'center'
+        }}
+      >
+        Create New Event
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit}>
+        <TextField
+          label="Event Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          fullWidth
+          required
+          sx={{
+            mb: 2,
+            input: { color: '#fff' },
+            label: { color: '#d4af37' },
+            '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
+          }}
+        />
+        <TextField
+          label="Description"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          fullWidth
+          multiline
+          rows={3}
+          sx={{
+            mb: 2,
+            input: { color: '#fff' },
+            label: { color: '#d4af37' },
+            '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
+          }}
+        />
+        <TextField
+          label="Date"
+          type="datetime-local"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          fullWidth
+          required
+          InputLabelProps={{ shrink: true }}
+          sx={{
+            mb: 2,
+            input: { color: '#fff' },
+            label: { color: '#d4af37' },
+            '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
+          }}
+        />
+        <TextField
+          label="Location"
+          value={location}
+          onChange={e => setLocation(e.target.value)}
+          fullWidth
+          required
+          sx={{
+            mb: 2,
+            input: { color: '#fff' },
+            label: { color: '#d4af37' },
+            '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
+          }}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          disabled={loading}
+          sx={{
+            bgcolor: '#d4af37',
+            color: '#000',
+            fontWeight: 'bold',
+            mt: 2,
+            '&:hover': { bgcolor: '#b38f1d' }
+          }}
+        >
+          {loading ? 'Creating...' : 'Create Event'}
+        </Button>
+      </Box>
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -88,7 +141,7 @@ const EventCreateForm: React.FC<EventCreateFormProps> = ({ onEventCreated }) => 
         message={snackbarMsg}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
-    </Box>
+    </Paper>
   );
 };
 
