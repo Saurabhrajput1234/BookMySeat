@@ -8,7 +8,7 @@ Admins can **manage events, seats, and users** via an Admin Dashboard.
 
 ## Live Demo
 - **Frontend:** [BookMySeat Live App](https://book-my-seat-three.vercel.app/)  
-- **Backend:** Hosted locally or deploy to Azure/AWS.
+- **Backend:** Hosted locally
 
 ---
 
