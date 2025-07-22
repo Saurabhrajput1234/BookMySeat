@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5224/api'; // ✅ Backend API URL
+const API_URL = 'http://localhost:5224/api';
 
-// ✅ Create Axios instance
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -10,10 +9,8 @@ const apiClient = axios.create({
   },
 });
 
-// ✅ Add interceptor to attach JWT token to every request automatically
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-   console.log('Outgoing API request:', config.url, 'with token:', token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,105 +18,49 @@ apiClient.interceptors.request.use((config) => {
 });
 
 // ===========================
-// ✅ AUTHENTICATION APIs
+// AUTH APIs
 // ===========================
 export const signup = async (name: string, email: string, password: string, role: string) => {
   const response = await apiClient.post('/auth/register', { name, email, password, role });
-  return response.data; // Expected response: { token: string }
+  return response.data;
 };
 
 export const login = async (email: string, password: string) => {
   const response = await apiClient.post('/auth/login', { email, password });
-  return response.data; // Expected response: { token: string }
-};
-
-// ===========================
-// ✅ EVENT APIs
-// ===========================
-export const getAllEvents = async () => {
-  const response = await apiClient.get('/events');
-  return response.data;
-};
-
-export const getEventById = async (id: number) => {
-  const response = await apiClient.get(`/events/${id}`);
-  return response.data;
-};
-
-export const createEvent = async (event: { name: string; description: string; date: string; location: string }) => {
-  const response = await apiClient.post('/events', event);
-  return response.data;
-};
-
-export const updateEvent = async (id: number, event: { name: string; description: string; date: string; location: string }) => {
-  const response = await apiClient.put(`/events/${id}`, event);
-  return response.data;
-};
-
-export const deleteEvent = async (id: number) => {
-  const response = await apiClient.delete(`/events/${id}`);
   return response.data;
 };
 
 // ===========================
-// ✅ SEAT APIs
+// EVENTS
 // ===========================
-export const getSeatsForEvent = async (eventId: number) => {
-  const response = await apiClient.get(`/seats/event/${eventId}`);
-  return response.data;
-};
-
-export const addSeatToEvent = async (eventId: number, seat: { row: string; number: number }) => {
-  const response = await apiClient.post('/seats', { eventId, ...seat });
-  return response.data;
-};
-
-export const deleteSeat = async (seatId: number) => {
-  const response = await apiClient.delete(`/seats/${seatId}`);
-  return response.data;
-};
+export const getAllEvents = async () => (await apiClient.get('/events')).data;
+export const getEventById = async (id: number) => (await apiClient.get(`/events/${id}`)).data;
+export const createEvent = async (event: any) => (await apiClient.post('/events', event)).data;
+export const updateEvent = async (id: number, event: any) => (await apiClient.put(`/events/${id}`, event)).data;
+export const deleteEvent = async (id: number) => (await apiClient.delete(`/events/${id}`)).data;
 
 // ===========================
-// ✅ BOOKING APIs
+// SEATS
 // ===========================
-export const bookSeat = async (eventId: number, seatId: number) => {
-  const response = await apiClient.post('/bookings/book', { eventId, seatId });
-  return response.data;
-};
-
-export const getMyBookings = async () => {
-  const response = await apiClient.get('/bookings/my');
-  return response.data;
-};
-
-export const getBookingsForEvent = async (eventId: number) => {
-  const response = await apiClient.get(`/bookings/event/${eventId}`);
-  return response.data;
-};
-
-export const deleteBooking = async (bookingId: number) => {
-  const response = await apiClient.delete(`/bookings/${bookingId}`);
-  return response.data;
-};
+export const getSeatsForEvent = async (eventId: number) => (await apiClient.get(`/seats/event/${eventId}`)).data;
+export const addSeat = async (eventId: number, seat: { row: string; number: number }) =>
+  (await apiClient.post('/seats', { EventId: eventId, Row: seat.row, Number: seat.number })).data;
+export const deleteSeat = async (seatId: number) => (await apiClient.delete(`/seats/${seatId}`)).data;
 
 // ===========================
-// ✅ USER MANAGEMENT APIs (Admin Only)
+// BOOKINGS
 // ===========================
-export const getUsers = async () => {
-  const response = await apiClient.get('/users');
-  return response.data;
-};
+export const bookSeat = async (eventId: number, seatId: number) =>
+  (await apiClient.post('/bookings/book', { eventId, seatId })).data;
 
-export const updateUserRole = async (id: number, role: string) => {
-  const response = await apiClient.put(`/users/${id}/role`, role, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return response.data;
-};
+export const getMyBookings = async () => (await apiClient.get('/bookings/my')).data;
+export const getBookingsForEvent = async (eventId: number) => (await apiClient.get(`/bookings/event/${eventId}`)).data;
+export const deleteBooking = async (bookingId: number) => (await apiClient.delete(`/bookings/${bookingId}`)).data;
 
-export const toggleUserActive = async (id: number, isActive: boolean) => {
-  const response = await apiClient.put(`/users/${id}/active`, isActive, {
-    headers: { 'Content-Type': 'application/json' },
-  });
-  return response.data;
-};
+// ===========================
+// USERS
+// ===========================
+export const getUsers = async () => (await apiClient.get('/users')).data;
+export const updateUserRole = async (id: number, role: string) => (await apiClient.put(`/users/${id}/role`, { role })).data;
+export const toggleUserActive = async (id: number, isActive: boolean) =>
+  (await apiClient.put(`/users/${id}/active`, { isActive })).data;

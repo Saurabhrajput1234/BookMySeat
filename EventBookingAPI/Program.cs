@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Database
+// ✅ Database (PostgreSQL)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -17,7 +18,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Event Booking API", Version = "v1" });
 
-    // ✅ Add JWT Security Definition
+    // ✅ Add JWT Security Definition for Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
@@ -27,7 +28,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
-    // ✅ Apply JWT Security Requirement globally
+    // ✅ Apply JWT Security globally
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -44,15 +45,24 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ✅ Controllers
-builder.Services.AddControllers();
+// ✅ Controllers with JSON options
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // ✅ Use camelCase for properties
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
 
-// ✅ CORS
+        // ✅ Prevent circular reference serialization error
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
+
+// ✅ CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // React app
+        policy.WithOrigins("http://localhost:5173") // React Frontend URL
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -78,23 +88,41 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"])),
+        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtSettings["Key"])),
 
-        // ✅ Important: Map Role claim properly
+        // ✅ Ensure Roles work properly
         RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("✅ JWT Token validated successfully.");
+            return Task.CompletedTask;
+        }
     };
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.IPasswordHasher<EventBookingAPI.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<EventBookingAPI.Models.User>>();
 
+// ✅ Password Hasher
+builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.IPasswordHasher<EventBookingAPI.Models.User>,
+    Microsoft.AspNetCore.Identity.PasswordHasher<EventBookingAPI.Models.User>>();
+
+// ✅ SignalR, Payment, Email Services
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<EventBookingAPI.Services.PaymentService>();
 builder.Services.AddSingleton<EventBookingAPI.Services.EmailService>();
 
 var app = builder.Build();
 
-// ✅ Swagger in Dev
+// ✅ Swagger in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -103,9 +131,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
+
+// ✅ Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
+// ✅ Map Controllers & SignalR Hubs
 app.MapControllers();
 app.MapHub<EventBookingAPI.Hubs.SeatHub>("/seathub");
 

@@ -16,8 +16,13 @@ const Login: React.FC = () => {
     setError('');
     try {
       const res = await apiLogin(email, password);
+      console.log('Received token from backend:', res.token);
+      if (!res.token || typeof res.token !== 'string' || !res.token.includes('.')) {
+        setError('Received invalid token from backend.');
+        return;
+      }
       login(res.token);
-      if (user?.role === 'Admin') {
+      if (res.role === 'Admin') {
         navigate('/admin');
       } else {
         navigate('/dashboard');

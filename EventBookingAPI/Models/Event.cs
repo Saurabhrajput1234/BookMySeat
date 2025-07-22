@@ -15,6 +15,6 @@ namespace EventBookingAPI.Models
         public DateTime Date { get; set; }
         [Required]
         public string Location { get; set; }
-        public ICollection<Seat> Seats { get; set; }
+        public ICollection<Seat> Seats { get; set; } = new List<Seat>();
     }
-} 
+}

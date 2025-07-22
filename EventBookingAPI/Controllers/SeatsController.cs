@@ -3,9 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using EventBookingAPI.Data;
 using EventBookingAPI.Models;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace EventBookingAPI.Controllers
 {
@@ -14,60 +15,109 @@ namespace EventBookingAPI.Controllers
     public class SeatsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+
         public SeatsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/seats/event/{eventId}
-        [HttpGet("event/{eventId}")]
-        public async Task<ActionResult<IEnumerable<Seat>>> GetSeatsForEvent(int eventId)
+        // ✅ DTO for Create Request
+        public class CreateSeatDto
         {
-            var seats = await _context.Seats.Where(s => s.EventId == eventId).ToListAsync();
-            return seats;
+            public int EventId { get; set; }
+            public string Row { get; set; }
+            public int Number { get; set; }
         }
 
-        // POST: api/seats
+        // ✅ DTO for Response (avoid circular reference)
+        public class SeatResponseDto
+        {
+            public int Id { get; set; }
+            public string Row { get; set; }
+            public int Number { get; set; }
+            public bool IsBooked { get; set; }
+        }
+
+        // ✅ Get all seats for a specific event
+        [HttpGet("event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<SeatResponseDto>>> GetSeatsForEvent(int eventId)
+        {
+            var seats = await _context.Seats
+                                      .Where(s => s.EventId == eventId)
+                                      .Select(s => new SeatResponseDto
+                                      {
+                                          Id = s.Id,
+                                          Row = s.Row,
+                                          Number = s.Number,
+                                          IsBooked = s.IsBooked
+                                      })
+                                      .ToListAsync();
+
+            return Ok(seats);
+        }
+
+        // ✅ Add a new seat (Admin only)
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Seat>> CreateSeat(Seat seat)
+        public async Task<ActionResult<SeatResponseDto>> CreateSeat([FromBody] CreateSeatDto seatDto)
         {
+            // Validate Event existence
+            var ev = await _context.Events.FindAsync(seatDto.EventId);
+            if (ev == null)
+                return NotFound(new { message = "Event not found" });
+
+            var seat = new Seat
+            {
+                EventId = seatDto.EventId,
+                Row = seatDto.Row,
+                Number = seatDto.Number,
+                IsBooked = false
+            };
+
             _context.Seats.Add(seat);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetSeatsForEvent), new { eventId = seat.EventId }, seat);
+
+            var response = new SeatResponseDto
+            {
+                Id = seat.Id,
+                Row = seat.Row,
+                Number = seat.Number,
+                IsBooked = seat.IsBooked
+            };
+
+            return CreatedAtAction(nameof(GetSeatsForEvent), new { eventId = seat.EventId }, response);
         }
 
-        // PUT: api/seats/{id}
+        // ✅ Update an existing seat
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateSeat(int id, Seat seat)
+        public async Task<IActionResult> UpdateSeat(int id, [FromBody] CreateSeatDto seatDto)
         {
-            if (id != seat.Id) return BadRequest();
-            _context.Entry(seat).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Seats.Any(s => s.Id == id))
-                    return NotFound();
-                else
-                    throw;
-            }
+            var seat = await _context.Seats.FindAsync(id);
+            if (seat == null)
+                return NotFound();
+
+            seat.Row = seatDto.Row;
+            seat.Number = seatDto.Number;
+
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
 
-        // DELETE: api/seats/{id}
+        // ✅ Delete a seat
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteSeat(int id)
         {
             var seat = await _context.Seats.FindAsync(id);
-            if (seat == null) return NotFound();
+            if (seat == null)
+                return NotFound();
+
             _context.Seats.Remove(seat);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }
-} 
+}
