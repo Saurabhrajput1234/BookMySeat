@@ -49,7 +49,9 @@ const EventDetail: React.FC = () => {
     loadData();
 
     const conn = new HubConnectionBuilder()
-      .withUrl('http://localhost:5224/seathub')
+      .withUrl('http://localhost:5224/seathub', {
+        accessTokenFactory: () => localStorage.getItem('token') || ''
+      })
       .withAutomaticReconnect()
       .build();
 
