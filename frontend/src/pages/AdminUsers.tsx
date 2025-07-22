@@ -34,7 +34,6 @@ const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogAction, setDialogAction] = useState<'role' | 'active' | null>(null);
@@ -116,7 +115,6 @@ const AdminUsers: React.FC = () => {
       </Typography>
 
       {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>

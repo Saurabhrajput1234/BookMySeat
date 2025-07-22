@@ -1,69 +1,65 @@
-# React + TypeScript + Vite
+# 🎟️ BookMySeat
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BookMySeat is an online event booking platform built using **React (frontend)** and **ASP.NET Core (backend)**.  
+The application allows users to **browse events, view details, select seats, and book them in real-time**.  
+Admins can **manage events, seats, and users** via an Admin Dashboard.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✅ Live Demo
+- **Frontend:** [BookMySeat Live App](https://book-my-seat-three.vercel.app/)  
+- **Backend:** Hosted locally or deploy to Azure/AWS.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Features
+### **User Features**
+- 🔍 Browse upcoming events
+- 📅 View event details (date, time, location)
+- 🎫 Book available seats in real-time
+- 📋 View booking history in **User Dashboard**
+- 🔐 Authentication & Authorization
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### **Admin Features**
+- ➕ Create and manage events
+- ➕ Add/Delete seats dynamically
+- 👥 Manage users (Activate/Deactivate, Role Updates)
+- 📊 View & manage bookings
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### **Real-Time Updates**
+- 🟢 SignalR integration for **live seat booking updates**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠️ Tech Stack
+### **Frontend**
+- React + TypeScript
+- Material-UI (MUI)
+- Axios
+- React Router DOM
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### **Backend**
+- ASP.NET Core Web API
+- Entity Framework Core
+- SignalR (real-time updates)
+- JWT Authentication
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### **Database**
+- SQL Server
+
+---
+
+## 📂 Project Structure
+BookMySeat/
+├── frontend/ # React app
+│ ├── src/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ ├── services/
+│ │ ├── contexts/
+│ │ └── App.tsx
+├── backend/ # ASP.NET Core API
+│ ├── Controllers/
+│ ├── Models/
+│ ├── Services/
+│ └── Program.cs

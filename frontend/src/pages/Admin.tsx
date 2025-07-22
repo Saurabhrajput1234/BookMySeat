@@ -21,7 +21,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import EventCreateForm from '../components/EventCreateForm';
 import {
   getAllEvents,
   deleteEvent,
@@ -327,9 +326,6 @@ const Admin: React.FC = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
 
-      {/* <Box sx={{ mt: 4 }}>
-        <EventCreateForm onEventCreated={fetchEvents} />
-      </Box> */}
     </Container>
   );
 };
