@@ -150,7 +150,7 @@ const Admin: React.FC = () => {
           <CircularProgress sx={{ color: '#d4af37' }} />
         </Box>
       ) : (
-        <Paper elevation={3} sx={{ p: 3, bgcolor: '#1c1c1c', borderRadius: 3 }}>
+        <Paper elevation={3} sx={{ p: 3, borderRadius: 3 }}>
           <List>
             {events.map(event => (
               <React.Fragment key={event.id}>

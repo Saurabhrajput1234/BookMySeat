@@ -18,9 +18,11 @@ import {
   DialogContentText,
   DialogActions,
   Snackbar,
-  Box
+  Box,
+  useMediaQuery
 } from '@mui/material';
 import { getUsers, updateUserRole, toggleUserActive } from '../services/api';
+import { useTheme } from '@mui/material/styles';
 
 interface User {
   id: number;
@@ -42,17 +44,18 @@ const AdminUsers: React.FC = () => {
   const [snackbarMsg, setSnackbarMsg] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success');
 
-  const fetchUsers = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const fetchUsers = async () => {
     setLoading(true);
-    getUsers()
-      .then(data => {
-        setUsers(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to load users.');
-        setLoading(false);
-      });
+    try {
+      const data = await getUsers();
+      setUsers(data);
+    } catch {
+      setError('Failed to load users.');
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -77,15 +80,14 @@ const AdminUsers: React.FC = () => {
     const newRole = selectedUser.role === 'Admin' ? 'User' : 'Admin';
     try {
       await updateUserRole(selectedUser.id, JSON.stringify(newRole));
-      setSnackbarMsg('User role updated.');
+      setSnackbarMsg('User role updated successfully.');
       setSnackbarSeverity('success');
-      setSnackbarOpen(true);
       fetchUsers();
     } catch {
       setSnackbarMsg('Failed to update user role.');
       setSnackbarSeverity('error');
-      setSnackbarOpen(true);
     }
+    setSnackbarOpen(true);
     setActionLoading(false);
     handleDialogClose();
   };
@@ -97,60 +99,105 @@ const AdminUsers: React.FC = () => {
       await toggleUserActive(selectedUser.id, !selectedUser.isActive);
       setSnackbarMsg(selectedUser.isActive ? 'User deactivated.' : 'User activated.');
       setSnackbarSeverity('success');
-      setSnackbarOpen(true);
       fetchUsers();
     } catch {
       setSnackbarMsg('Failed to update user status.');
       setSnackbarSeverity('error');
-      setSnackbarOpen(true);
     }
+    setSnackbarOpen(true);
     setActionLoading(false);
     handleDialogClose();
   };
 
   return (
-    <Container>
-      <Typography variant="h4" sx={{ mt: 4, color: '#d4af37', fontWeight: 'bold' }}>
+    <Container
+      sx={{  
+        minHeight: '100vh',
+        py: 4,
+        color: '#fff',
+      }}
+    >
+      <Typography
+        variant="h4"
+        sx={{
+          mb: 4,
+          color: '#d4af37',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          letterSpacing: '1px'
+        }}
+      >
         User Management
       </Typography>
 
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-          <CircularProgress />
+          <CircularProgress sx={{ color: '#d4af37' }} />
         </Box>
       ) : (
-        <TableContainer component={Paper} sx={{ mt: 4, borderRadius: 2, boxShadow: 3 }}>
-          <Table>
-            <TableHead sx={{ backgroundColor: '#d4af37' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Role</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Status</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', color: '#fff' }}>Actions</TableCell>
+        <TableContainer
+          component={Paper}
+          sx={{
+            mt: 4,
+            borderRadius: 3,
+            overflowX: 'auto',
+            bgcolor: '#1e1e1e',
+            color: '#fff',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.4)'
+          }}
+        >
+          <Table size={isMobile ? 'small' : 'medium'}>
+            <TableHead>
+              <TableRow sx={{ bgcolor: '#d4af37' }}>
+                <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Name</TableCell>
+                {!isMobile && <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Email</TableCell>}
+                <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Role</TableCell>
+                {!isMobile && <TableCell sx={{ fontWeight: 'bold', color: '#000' }}>Status</TableCell>}
+                <TableCell sx={{ fontWeight: 'bold', color: '#000', textAlign: 'center' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {users.map(user => (
-                <TableRow key={user.id} hover>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.role}</TableCell>
-                  <TableCell sx={{ color: user.isActive ? '#4caf50' : '#f44336' }}>
-                    {user.isActive ? 'Active' : 'Inactive'}
-                  </TableCell>
+                <TableRow
+                  key={user.id}
+                  hover
+                  sx={{
+                    '&:hover': { bgcolor: '#2a2a2a' },
+                    transition: '0.3s ease'
+                  }}
+                >
+                  <TableCell sx={{ color: '#fff' }}>{user.name}</TableCell>
+                  {!isMobile && <TableCell sx={{ color: '#ccc' }}>{user.email}</TableCell>}
+                  <TableCell sx={{ color: '#d4af37', fontWeight: 'bold' }}>{user.role}</TableCell>
+                  {!isMobile && (
+                    <TableCell sx={{ color: user.isActive ? '#4caf50' : '#f44336', fontWeight: 'bold' }}>
+                      {user.isActive ? 'Active' : 'Inactive'}
+                    </TableCell>
+                  )}
                   <TableCell>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: isMobile ? 'row' : 'column',
+                        gap: 1,
+                        justifyContent: 'center'
+                      }}
+                    >
                       <Button
                         variant="outlined"
                         sx={{
                           borderColor: '#d4af37',
                           color: '#d4af37',
-                          width: '140px',
-                          fontSize: '0.8rem',
-                          '&:hover': { backgroundColor: '#d4af37', color: '#fff' }
+                          width: isMobile ? 'auto' : '140px',
+                          fontWeight: 'bold',
+                          '&:hover': { backgroundColor: '#d4af37', color: '#121212' }
                         }}
                         size="small"
                         onClick={() => handleDialogOpen(user, 'role')}
@@ -163,8 +210,8 @@ const AdminUsers: React.FC = () => {
                         sx={{
                           backgroundColor: user.isActive ? '#f44336' : '#4caf50',
                           color: '#fff',
-                          width: '140px',
-                          fontSize: '0.8rem',
+                          width: isMobile ? 'auto' : '140px',
+                          fontWeight: 'bold',
                           '&:hover': { opacity: 0.9 }
                         }}
                         size="small"
@@ -182,8 +229,9 @@ const AdminUsers: React.FC = () => {
         </TableContainer>
       )}
 
+      {/* Confirmation Dialog */}
       <Dialog open={dialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>Confirm Action</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold' }}>Confirm Action</DialogTitle>
         <DialogContent>
           <DialogContentText>
             {dialogAction === 'role' && selectedUser && (
@@ -201,6 +249,7 @@ const AdminUsers: React.FC = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
