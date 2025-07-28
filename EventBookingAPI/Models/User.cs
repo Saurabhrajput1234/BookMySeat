@@ -12,6 +12,8 @@ namespace EventBookingAPI.Models
 
         public string Role { get; set; } = "User"; // Default role is User
 
-        public bool IsActive { get; set; } = true; // ✅ New property
+        public bool IsActive { get; set; } = true; //  New property
+
+        public bool EmailVerified { get; set; } = false; // Email verification status
     }
 }

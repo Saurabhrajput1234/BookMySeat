@@ -30,6 +30,16 @@ export const login = async (email: string, password: string) => {
   return response.data;
 };
 
+export const sendVerificationCode = async (email: string) => {
+  const response = await apiClient.post('/auth/send-verification-code', { email });
+  return response.data;
+};
+
+export const verifyCode = async (email: string, code: string) => {
+  const response = await apiClient.post('/auth/verify-code', { email, code });
+  return response.data;
+};
+
 
 // EVENTS
 
@@ -64,3 +74,12 @@ export const getUsers = async () => (await apiClient.get('/users')).data;
 export const updateUserRole = async (id: number, role: string) => (await apiClient.put(`/users/${id}/role`, { role })).data;
 export const toggleUserActive = async (id: number, isActive: boolean) =>
   (await apiClient.put(`/users/${id}/active`, { isActive })).data;
+
+
+// PAYMENTS
+
+export const createPaymentIntent = async (bookingId: number, currency: string = 'usd') =>
+  (await apiClient.post('/bookings/payment-intent', { bookingId, currency })).data;
+
+export const confirmPayment = async (bookingId: number, paymentIntentId: string) =>
+  (await apiClient.post('/bookings/confirm-payment', { bookingId, paymentIntentId })).data;

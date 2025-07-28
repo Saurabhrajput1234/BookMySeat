@@ -15,6 +15,7 @@ namespace EventBookingAPI.Models
         public DateTime Date { get; set; }
         [Required]
         public string Location { get; set; }
+        public decimal Price { get; set; } // Ticket price
         public ICollection<Seat> Seats { get; set; } = new List<Seat>();
     }
 }

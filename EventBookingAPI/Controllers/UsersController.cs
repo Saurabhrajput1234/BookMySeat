@@ -61,28 +61,34 @@ namespace EventBookingAPI.Controllers
 
         // ✅ PUT: api/users/{id}/role - Update user role
         [HttpPut("{id}/role")]
-        public async Task<IActionResult> UpdateUserRole(int id, [FromBody] string newRole)
+        public async Task<IActionResult> UpdateUserRole(int id, [FromBody] UpdateUserRoleDto dto)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound(new { message = "User not found" });
-
-            if (newRole != "Admin" && newRole != "User")
+            if (dto.Role != "Admin" && dto.Role != "User")
                 return BadRequest(new { message = "Invalid role" });
-
-            user.Role = newRole;
+            user.Role = dto.Role;
             await _context.SaveChangesAsync();
-
             return Ok(new { message = "User role updated successfully" });
         }
 
+        public class UpdateUserRoleDto
+        {
+            public string Role { get; set; }
+        }
         // ✅ PUT: api/users/{id}/active - Toggle user active/inactive
+        public class ToggleUserActiveDto
+        {
+            public bool IsActive { get; set; }
+        }
+
         [HttpPut("{id}/active")]
-        public async Task<IActionResult> ToggleUserActive(int id, [FromBody] bool isActive)
+        public async Task<IActionResult> ToggleUserActive(int id, [FromBody] ToggleUserActiveDto dto)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound(new { message = "User not found" });
 
-            user.IsActive = isActive;
+            user.IsActive = dto.IsActive;
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "User status updated successfully" });

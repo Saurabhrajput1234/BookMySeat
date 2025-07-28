@@ -79,7 +79,7 @@ const AdminUsers: React.FC = () => {
     setActionLoading(true);
     const newRole = selectedUser.role === 'Admin' ? 'User' : 'Admin';
     try {
-      await updateUserRole(selectedUser.id, JSON.stringify(newRole));
+      await updateUserRole(selectedUser.id, newRole);
       setSnackbarMsg('User role updated successfully.');
       setSnackbarSeverity('success');
       fetchUsers();
@@ -114,7 +114,7 @@ const AdminUsers: React.FC = () => {
       sx={{  
         minHeight: '100vh',
         py: 4,
-        color: '#fff',
+        color: 'black',
       }}
     >
       <Typography

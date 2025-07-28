@@ -1,40 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Container,
-  Typography,
-  Box,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
-  IconButton,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Snackbar,
-  TextField,
-  Divider,
-  Paper
+  Container, Typography, Box, List, ListItem, ListItemText, Button,
+  IconButton, CircularProgress, Dialog, DialogTitle, DialogContent,
+  DialogContentText, DialogActions, Snackbar, TextField, Divider, Paper
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {
-  getAllEvents,
-  deleteEvent,
-  getSeatsForEvent,
-  deleteSeat,
-  getBookingsForEvent,
-  deleteBooking,
-  addSeat
+  getAllEvents, deleteEvent, getSeatsForEvent, deleteSeat,
+  getBookingsForEvent, deleteBooking, addSeat
 } from '../services/api';
 
 interface Event {
   id: number;
   name: string;
   date: string;
+  price?: number;
 }
 
 interface Seat {
@@ -66,6 +47,13 @@ const Admin: React.FC = () => {
   const [newSeatRow, setNewSeatRow] = useState<Record<number, string>>({});
   const [newSeatNumber, setNewSeatNumber] = useState<Record<number, string>>({});
   const [addingSeat, setAddingSeat] = useState<Record<number, boolean>>({});
+
+  // States for Event Dialog
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [eventName, setEventName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventPrice, setEventPrice] = useState('');
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -110,7 +98,7 @@ const Admin: React.FC = () => {
     setDialogOpen(true);
   };
 
-  const confirmAction = () => {
+  const confirmActionDialog = () => {
     onConfirm();
     setDialogOpen(false);
   };
@@ -118,7 +106,6 @@ const Admin: React.FC = () => {
   const handleAddSeat = async (eventId: number) => {
     const row = newSeatRow[eventId];
     const number = Number(newSeatNumber[eventId]);
-
     if (!row || !number || number <= 0) {
       setSnackbarMsg('Please enter valid row and seat number');
       setSnackbarOpen(true);
@@ -139,6 +126,22 @@ const Admin: React.FC = () => {
     setAddingSeat(prev => ({ ...prev, [eventId]: false }));
   };
 
+  const handleEventDialogClose = () => {
+    setEventDialogOpen(false);
+    setEditingEvent(null);
+    setEventName('');
+    setEventDate('');
+    setEventPrice('');
+  };
+
+  const handleSaveEvent = async () => {
+    // TODO: Implement event create or update API call
+    handleEventDialogClose();
+    setSnackbarMsg(editingEvent ? 'Event updated' : 'Event created');
+    setSnackbarOpen(true);
+    fetchEvents();
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Typography variant="h4" sx={{ color: '#d4af37', fontWeight: 'bold', mb: 3 }}>
@@ -154,16 +157,7 @@ const Admin: React.FC = () => {
           <List>
             {events.map(event => (
               <React.Fragment key={event.id}>
-                <ListItem
-                  sx={{
-                    bgcolor: '#2a2a2a',
-                    mb: 2,
-                    borderRadius: 2,
-                    color: '#fff',
-                    display: 'flex',
-                    justifyContent: 'space-between'
-                  }}
-                >
+                <ListItem sx={{ bgcolor: 'black', mb: 2, borderRadius: 2, color: '#fff', justifyContent: 'space-between' }}>
                   <ListItemText
                     primary={event.name}
                     secondary={event.date}
@@ -176,17 +170,11 @@ const Admin: React.FC = () => {
                     </IconButton>
                     <Button
                       variant="contained"
-                      sx={{
-                        ml: 2,
-                        bgcolor: '#b22222',
-                        '&:hover': { bgcolor: '#8b0000' }
-                      }}
-                      onClick={() =>
-                        handleDelete('Delete this event?', async () => {
-                          await deleteEvent(event.id);
-                          fetchEvents();
-                        })
-                      }
+                      sx={{ ml: 2, bgcolor: '#b22222', '&:hover': { bgcolor: '#8b0000' } }}
+                      onClick={() => handleDelete('Delete this event?', async () => {
+                        await deleteEvent(event.id);
+                        fetchEvents();
+                      })}
                     >
                       Delete
                     </Button>
@@ -194,10 +182,8 @@ const Admin: React.FC = () => {
                 </ListItem>
 
                 {expandedEvent === event.id && (
-                  <Box sx={{ pl: 2, py: 2, bgcolor: '#2f2f2f', borderRadius: 2, mb: 2 }}>
-                    <Typography variant="h6" sx={{ color: '#d4af37', mb: 2 }}>
-                      Seats
-                    </Typography>
+                  <Box sx={{ pl: 2,pr:2, py: 2, bgcolor: '#2f2f2f', borderRadius: 2, mb: 2 }}>
+                    <Typography variant="h6" sx={{ color: '#d4af37', mb: 2 }}>Seats</Typography>
 
                     {/* Add Seat */}
                     <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
@@ -206,11 +192,7 @@ const Admin: React.FC = () => {
                         value={newSeatRow[event.id] || ''}
                         onChange={e => setNewSeatRow(prev => ({ ...prev, [event.id]: e.target.value }))}
                         size="small"
-                        sx={{
-                          input: { color: '#fff' },
-                          label: { color: '#d4af37' },
-                          '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
-                        }}
+                        sx={{ input: { color: '#fff' }, label: { color: '#d4af37' } }}
                       />
                       <TextField
                         label="Number"
@@ -218,20 +200,11 @@ const Admin: React.FC = () => {
                         value={newSeatNumber[event.id] || ''}
                         onChange={e => setNewSeatNumber(prev => ({ ...prev, [event.id]: e.target.value }))}
                         size="small"
-                        sx={{
-                          input: { color: '#fff' },
-                          label: { color: '#d4af37' },
-                          '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' }
-                        }}
+                        sx={{ input: { color: '#fff' }, label: { color: '#d4af37' } }}
                       />
                       <Button
                         variant="contained"
-                        sx={{
-                          bgcolor: '#d4af37',
-                          color: '#000',
-                          fontWeight: 'bold',
-                          '&:hover': { bgcolor: '#b38f1d' }
-                        }}
+                        sx={{ bgcolor: '#d4af37', color: '#000', fontWeight: 'bold' }}
                         onClick={() => handleAddSeat(event.id)}
                         disabled={addingSeat[event.id]}
                       >
@@ -239,27 +212,17 @@ const Admin: React.FC = () => {
                       </Button>
                     </Box>
 
+                    {/* List Seats */}
                     {seats[event.id]?.map(seat => (
-                      <Box
-                        key={seat.id}
-                        sx={{ display: 'flex', justifyContent: 'space-between', color: '#fff', mb: 1 }}
-                      >
-                        <Typography>
-                          Row {seat.row} - #{seat.number}
-                        </Typography>
+                      <Box key={seat.id} sx={{ display: 'flex', justifyContent: 'space-between', color: '#fff', mb: 1 }}>
+                        <Typography>Row {seat.row} - #{seat.number} (ID: {seat.id})</Typography>
                         <Button
                           variant="outlined"
-                          sx={{
-                            borderColor: '#b22222',
-                            color: '#b22222',
-                            '&:hover': { borderColor: '#8b0000', color: '#8b0000' }
-                          }}
-                          onClick={() =>
-                            handleDelete('Delete this seat?', async () => {
-                              await deleteSeat(seat.id);
-                              fetchEventDetails(event.id);
-                            })
-                          }
+                          sx={{ borderColor: '#b22222', color: '#b22222' }}
+                          onClick={() => handleDelete('Delete this seat?', async () => {
+                            await deleteSeat(seat.id);
+                            fetchEventDetails(event.id);
+                          })}
                         >
                           Delete
                         </Button>
@@ -268,30 +231,17 @@ const Admin: React.FC = () => {
 
                     <Divider sx={{ my: 2, borderColor: '#444' }} />
 
-                    <Typography variant="h6" sx={{ color: '#d4af37', mb: 1 }}>
-                      Bookings
-                    </Typography>
+                    <Typography variant="h6" sx={{ color: '#d4af37', mb: 1 }}>Bookings</Typography>
                     {bookings[event.id]?.map(booking => (
-                      <Box
-                        key={booking.id}
-                        sx={{ display: 'flex', justifyContent: 'space-between', color: '#fff', mb: 1 }}
-                      >
-                        <Typography>
-                          {booking.userName} (Seat #{booking.seatId})
-                        </Typography>
+                      <Box key={booking.id} sx={{ display: 'flex', justifyContent: 'space-between', color: '#fff', mb: 1 }}>
+                        <Typography>{booking.userName} (Seat #{booking.seatId})</Typography>
                         <Button
                           variant="outlined"
-                          sx={{
-                            borderColor: '#b22222',
-                            color: '#b22222',
-                            '&:hover': { borderColor: '#8b0000', color: '#8b0000' }
-                          }}
-                          onClick={() =>
-                            handleDelete('Delete this booking?', async () => {
-                              await deleteBooking(booking.id);
-                              fetchEventDetails(event.id);
-                            })
-                          }
+                          sx={{ borderColor: '#b22222', color: '#b22222' }}
+                          onClick={() => handleDelete('Delete this booking?', async () => {
+                            await deleteBooking(booking.id);
+                            fetchEventDetails(event.id);
+                          })}
                         >
                           Delete
                         </Button>
@@ -305,6 +255,7 @@ const Admin: React.FC = () => {
         </Paper>
       )}
 
+      {/* Confirm Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Confirm Action</DialogTitle>
         <DialogContent>
@@ -312,12 +263,11 @@ const Admin: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmAction} sx={{ color: '#d4af37' }}>
-            Confirm
-          </Button>
+          <Button onClick={confirmActionDialog} sx={{ color: '#d4af37' }}>Confirm</Button>
         </DialogActions>
       </Dialog>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -326,6 +276,19 @@ const Admin: React.FC = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
 
+      {/* Event Create/Edit Dialog */}
+      <Dialog open={eventDialogOpen} onClose={handleEventDialogClose}>
+        <DialogTitle>{editingEvent ? 'Edit Event' : 'Create Event'}</DialogTitle>
+        <DialogContent>
+          <TextField label="Event Name" value={eventName} onChange={e => setEventName(e.target.value)} fullWidth sx={{ mb: 2 }} />
+          <TextField label="Date" type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} sx={{ mb: 2 }} />
+          <TextField label="Ticket Price" type="number" value={eventPrice} onChange={e => setEventPrice(e.target.value)} fullWidth sx={{ mb: 2 }} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEventDialogClose}>Cancel</Button>
+          <Button onClick={handleSaveEvent} sx={{ color: '#d4af37' }}>{editingEvent ? 'Update' : 'Create'}</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
