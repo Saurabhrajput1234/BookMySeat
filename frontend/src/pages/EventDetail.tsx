@@ -208,8 +208,8 @@ const EventDetail: React.FC = () => {
             fullWidth
             sx={{
               maxWidth: '150px',
-              bgcolor: seat.isBooked ? '#333' : '#d4af37',
-              color: seat.isBooked ? '#999' : '#000',
+              bgcolor: seat.isBooked ? 'red' : '#d4af37',
+              color: seat.isBooked ? 'red' : 'green',
               fontWeight: 600,
               borderRadius: '8px',
               textTransform: 'none',
@@ -220,7 +220,7 @@ const EventDetail: React.FC = () => {
             onClick={() => handleBook(seat.id)}
           >
             <Typography>
-              Row {seat.row} - #{seat.number} (ID: {seat.id})
+              Row {seat.row} - #{seat.number}
             </Typography>
           </Button>
         ))}

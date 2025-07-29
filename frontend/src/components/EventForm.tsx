@@ -39,14 +39,13 @@ const EventForm: React.FC<EventFormProps> = ({
   const [snackbarMsg, setSnackbarMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // ✅ Set initial values only on mount
   useEffect(() => {
     setName(initialValues.name || '');
     setDescription(initialValues.description || '');
     setDate(initialValues.date || '');
     setLocation(initialValues.location || '');
     setPrice(initialValues.price !== undefined ? initialValues.price.toString() : '');
-  }, []); // removed initialValues dependency to prevent overwrite on every render
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +74,24 @@ const EventForm: React.FC<EventFormProps> = ({
       setSnackbarOpen(true);
     }
     setSubmitting(false);
+  };
+
+  const inputStyles = {
+    mb: 2,
+    input: {
+      backgroundColor: '#fff',
+      color: '#000',
+    },
+    textarea: {
+      backgroundColor: '#fff',
+      color: '#000',
+    },
+    label: { color: '#d4af37' },
+    '& .MuiOutlinedInput-root': {
+      '& fieldset': { borderColor: '#d4af37' },
+      '&:hover fieldset': { borderColor: '#d4af37' },
+      '&.Mui-focused fieldset': { borderColor: '#d4af37' },
+    },
   };
 
   return (
@@ -108,12 +125,7 @@ const EventForm: React.FC<EventFormProps> = ({
             onChange={(e) => setName(e.target.value)}
             fullWidth
             required
-            sx={{
-              mb: 2,
-              input: { color: '#fff' },
-              label: { color: '#d4af37' },
-              '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' },
-            }}
+            sx={inputStyles}
           />
           <TextField
             label="Description"
@@ -122,12 +134,7 @@ const EventForm: React.FC<EventFormProps> = ({
             fullWidth
             multiline
             rows={3}
-            sx={{
-              mb: 2,
-              input: { color: '#fff' },
-              label: { color: '#d4af37' },
-              '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' },
-            }}
+            sx={inputStyles}
           />
           <TextField
             label="Date"
@@ -137,12 +144,7 @@ const EventForm: React.FC<EventFormProps> = ({
             fullWidth
             required
             InputLabelProps={{ shrink: true }}
-            sx={{
-              mb: 2,
-              input: { color: '#fff' },
-              label: { color: '#d4af37' },
-              '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' },
-            }}
+            sx={inputStyles}
           />
           <TextField
             label="Location"
@@ -150,12 +152,7 @@ const EventForm: React.FC<EventFormProps> = ({
             onChange={(e) => setLocation(e.target.value)}
             fullWidth
             required
-            sx={{
-              mb: 2,
-              input: { color: '#fff' },
-              label: { color: '#d4af37' },
-              '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' },
-            }}
+            sx={inputStyles}
           />
           <TextField
             label="Ticket Price"
@@ -164,12 +161,7 @@ const EventForm: React.FC<EventFormProps> = ({
             onChange={(e) => setPrice(e.target.value)}
             fullWidth
             required
-            sx={{
-              mb: 2,
-              input: { color: '#fff' },
-              label: { color: '#d4af37' },
-              '& .MuiOutlinedInput-root fieldset': { borderColor: '#d4af37' },
-            }}
+            sx={inputStyles}
           />
           <Button
             type="submit"

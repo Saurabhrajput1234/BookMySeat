@@ -30,7 +30,7 @@ const Home: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        background: 'linear-gradient(-45deg,rgb(239, 207, 78),rgb(255, 250, 232),rgb(254, 252, 219), #fef9c3)',
+        background: 'linear-gradient(-45deg, rgb(143 115 5), rgb(255, 250, 232), rgb(226 156 42), #fef9c3)',
         backgroundSize: '400% 400%',
         animation: `${backgroundMotion} 12s ease-in-out infinite`,
       }}
@@ -76,8 +76,8 @@ const Home: React.FC = () => {
           <Button
             variant="contained"
             sx={{
-              bgcolor: '#1e40af',
-              color: '#fff',
+              bgcolor: '#d4af37',
+              color: 'black',
               px: 4,
               py: 1.5,
               fontWeight: 600,
@@ -85,7 +85,7 @@ const Home: React.FC = () => {
               textTransform: 'none',
               borderRadius: '8px',
               boxShadow: '0 2px 8px rgba(30,64,175,0.15)',
-              '&:hover': { bgcolor: '#1e3a8a' },
+              '&:hover': { bgcolor: '#b38f1d' },
             }}
             onClick={() => navigate('/login')}
           >
@@ -94,8 +94,8 @@ const Home: React.FC = () => {
           <Button
             variant="outlined"
             sx={{
-              borderColor: '#a21caf',
-              color: '#a21caf',
+              borderColor: 'black',
+              color: 'black',
               px: 4,
               py: 1.5,
               fontWeight: 600,
