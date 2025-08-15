@@ -21,7 +21,7 @@ namespace EventBookingAPI.Controllers
             _context = context;
         }
 
-        // ✅ DTO for Create Request
+        //DTO for Create Request
         public class CreateSeatDto
         {
             public int EventId { get; set; }
@@ -29,7 +29,7 @@ namespace EventBookingAPI.Controllers
             public int Number { get; set; }
         }
 
-        // ✅ DTO for Response (avoid circular reference)
+        //DTO for Response (avoid circular reference)
         public class SeatResponseDto
         {
             public int Id { get; set; }
@@ -38,7 +38,7 @@ namespace EventBookingAPI.Controllers
             public bool IsBooked { get; set; }
         }
 
-        // ✅ Get all seats for a specific event
+        //Get all seats for a specific event
         [HttpGet("event/{eventId}")]
         public async Task<ActionResult<IEnumerable<SeatResponseDto>>> GetSeatsForEvent(int eventId)
         {
@@ -56,7 +56,7 @@ namespace EventBookingAPI.Controllers
             return Ok(seats);
         }
 
-        // ✅ Add a new seat (Admin only)
+        //Add a new seat (Admin only)
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<SeatResponseDto>> CreateSeat([FromBody] CreateSeatDto seatDto)
@@ -88,7 +88,7 @@ namespace EventBookingAPI.Controllers
             return CreatedAtAction(nameof(GetSeatsForEvent), new { eventId = seat.EventId }, response);
         }
 
-        // ✅ Update an existing seat
+        //Update an existing seat
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateSeat(int id, [FromBody] CreateSeatDto seatDto)
@@ -105,7 +105,7 @@ namespace EventBookingAPI.Controllers
             return NoContent();
         }
 
-        // ✅ Delete a seat
+        // Delete a seat
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteSeat(int id)

@@ -13,7 +13,7 @@ using System.Reflection;
 
 [assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("1586ff9c-42b5-468d-8cb2-8fb00d35876b")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("EventBookingAPI")]
-[assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
+[assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dbaaba6b4bdf232eaba9b0d8caf7aaa6027a33ac")]
 [assembly: System.Reflection.AssemblyProductAttribute("EventBookingAPI")]

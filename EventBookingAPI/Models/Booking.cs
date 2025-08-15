@@ -23,6 +23,6 @@ namespace EventBookingAPI.Models
         [Required]
         public DateTime BookingTime { get; set; }
         [Required]
-        public string PaymentStatus { get; set; } // e.g., "Pending", "Paid"
+        public string PaymentStatus { get; set; }
     }
 } 

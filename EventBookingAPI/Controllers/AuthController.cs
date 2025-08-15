@@ -96,7 +96,7 @@ namespace EventBookingAPI.Controllers
             return BadRequest("Invalid verification code. Please check and try again.");
         }
 
-        // ✅ Register Endpoint
+        //Register Endpoint
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
@@ -120,7 +120,7 @@ namespace EventBookingAPI.Controllers
             return Ok(new { message = $"Registration successful as {role}." });
         }
 
-        // ✅ Login Endpoint
+        //Login Endpoint
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -137,12 +137,12 @@ namespace EventBookingAPI.Controllers
 
             var token = _jwtTokenService.GenerateToken(user);
 
-            // ✅ Return both token & role for frontend UI control
+            //Return both token & role for frontend UI control
             return Ok(new { token, role = user.Role, name = user.Name });
         }
     }
 
-    // ✅ DTOs
+    //DTOs
     public class RegisterRequest
     {
         public string Name { get; set; }

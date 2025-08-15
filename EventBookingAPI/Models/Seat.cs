@@ -13,7 +13,7 @@ namespace EventBookingAPI.Models
         public int EventId { get; set; }
 
         [ForeignKey("EventId")]
-        [JsonIgnore] // ✅ Prevent cycle serialization
+        [JsonIgnore] 
         public Event Event { get; set; }
 
         [Required]
@@ -24,7 +24,7 @@ namespace EventBookingAPI.Models
 
         public bool IsBooked { get; set; }
 
-        [JsonIgnore] // ✅ Prevent cycle
+        [JsonIgnore] 
         public Booking? Booking { get; set; }
     }
 }

@@ -31,7 +31,7 @@ namespace EventBookingAPI.Controllers
             _emailService = emailService;
         }
 
-        // ✅ Book a Seat
+        //Book a Seat
         [HttpPost("book")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> BookSeat([FromBody] BookSeatRequest request)
@@ -72,7 +72,7 @@ namespace EventBookingAPI.Controllers
             }
         }
 
-        // ✅ Get My Bookings
+        //Get My Bookings
         [HttpGet("my")]
         [Authorize(Roles = "User,Admin")]
         public async Task<ActionResult<IEnumerable<Booking>>> GetMyBookings()
@@ -87,7 +87,7 @@ namespace EventBookingAPI.Controllers
                 .ToListAsync();
         }
 
-        // ✅ Get All Bookings (Admin)
+        //Get All Bookings (Admin)
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Booking>>> GetAllBookings()
@@ -99,7 +99,7 @@ namespace EventBookingAPI.Controllers
                 .ToListAsync();
         }
 
-        // ✅ Get Bookings for Event
+        //Get Bookings for Event
         [HttpGet("event/{eventId}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookingsForEvent(int eventId)
@@ -112,7 +112,7 @@ namespace EventBookingAPI.Controllers
                 .ToListAsync();
         }
 
-        // ✅ Delete Booking (Admin)
+        //Delete Booking (Admin)
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteBooking(int id)
@@ -134,7 +134,7 @@ namespace EventBookingAPI.Controllers
             return NoContent();
         }
 
-        // ✅ Payment Intent
+        //Payment Intent
         [HttpPost("payment-intent")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> CreatePaymentIntent([FromBody] CreatePaymentIntentRequest request)
@@ -144,7 +144,7 @@ namespace EventBookingAPI.Controllers
             return Ok(new { clientSecret = paymentIntent.ClientSecret });
         }
 
-        // ✅ Confirm Payment
+        // Confirm Payment
         [HttpPost("confirm-payment")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> ConfirmPayment([FromBody] ConfirmPaymentRequest request)

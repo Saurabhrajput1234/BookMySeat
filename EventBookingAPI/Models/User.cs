@@ -10,9 +10,9 @@ namespace EventBookingAPI.Models
 
         public string PasswordHash { get; set; } = string.Empty;
 
-        public string Role { get; set; } = "User"; // Default role is User
+        public string Role { get; set; } = "User"; 
 
-        public bool IsActive { get; set; } = true; //  New property
+        public bool IsActive { get; set; } = true; 
 
         public bool EmailVerified { get; set; } = false; // Email verification status
     }

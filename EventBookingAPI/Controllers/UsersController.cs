@@ -10,7 +10,7 @@ namespace EventBookingAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "Admin")] // ✅ Admin only
+    [Authorize(Roles = "Admin")] 
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -20,7 +20,7 @@ namespace EventBookingAPI.Controllers
             _context = context;
         }
 
-        // ✅ GET: api/users - List all users
+        //GET: api/users - List all users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetUsers()
         {
@@ -38,7 +38,7 @@ namespace EventBookingAPI.Controllers
             return Ok(users);
         }
 
-        // ✅ GET: api/users/{id}
+        //GET: api/users/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetUser(int id)
         {
@@ -59,7 +59,7 @@ namespace EventBookingAPI.Controllers
             return Ok(user);
         }
 
-        // ✅ PUT: api/users/{id}/role - Update user role
+        //PUT: api/users/{id}/role - Update user role
         [HttpPut("{id}/role")]
         public async Task<IActionResult> UpdateUserRole(int id, [FromBody] UpdateUserRoleDto dto)
         {
@@ -76,7 +76,7 @@ namespace EventBookingAPI.Controllers
         {
             public string Role { get; set; }
         }
-        // ✅ PUT: api/users/{id}/active - Toggle user active/inactive
+        //PUT: api/users/{id}/active - Toggle user active/inactive
         public class ToggleUserActiveDto
         {
             public bool IsActive { get; set; }

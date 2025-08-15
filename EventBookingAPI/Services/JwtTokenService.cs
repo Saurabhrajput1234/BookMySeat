@@ -27,7 +27,7 @@ namespace EventBookingAPI.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", user.Role), // ✅ Correct role claim
+                new Claim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", user.Role),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

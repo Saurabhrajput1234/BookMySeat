@@ -1,4 +1,4 @@
-import axios from 'axios';
+` axios from 'axios';
 
 const API_URL = 'http://localhost:5224/api';
 
