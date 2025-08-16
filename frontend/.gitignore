@@ -11,6 +11,20 @@ node_modules
 dist
 dist-ssr
 *.local
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+
+# Logs
+*.log
+
+# Node modules
+frontend/node_modules/
 
 # Editor directories and files
 .vscode/*

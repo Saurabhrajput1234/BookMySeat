@@ -35,98 +35,98 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
-      <Typography
-        variant="h3"
-        sx={{
-          fontWeight: 700,
+          <Container maxWidth="md" sx={{ py: 6 }}>
+                    <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
           mb: 4,
           textAlign: 'center',
           color: '#d4af37'
-        }}
-      >
-        User Dashboard
-      </Typography>
+            }}
+          >
+            User Dashboard
+          </Typography>
+        
+        <Box sx={{ mb: 3 }}>
+          <Typography
+            variant="h5"
+            sx={{               mb: 2,               color: '#d4af37',               fontWeight: 600             }}
+          >
+            My Bookings
+          </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <Typography
-          variant="h5"
-          sx={{ mb: 2, color: '#d4af37', fontWeight: 600 }}
-        >
-          My Bookings
-        </Typography>
+          {loading && (
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <CircularProgress sx={{ color: '#d4af37' }} />
+            </Box>
+          )}
 
-        {loading && (
-          <Box sx={{ textAlign: 'center', mt: 4 }}>
-            <CircularProgress sx={{ color: '#d4af37' }} />
-          </Box>
-        )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {!loading && !error && bookings.length === 0 && (
-          <Alert
+          {!loading && !error && bookings.length === 0 && (
+            <Alert
             severity="info"
             sx={{ bgcolor: '#fffbe6', color: '#000', fontWeight: 500 }}
-          >
-            No bookings found.
-          </Alert>
-        )}
+>
+                No bookings found.
+              </Alert>
+          )}
 
-        {!loading &&
-          !error &&
-          bookings.map(booking => (
-            <Card
-              key={booking.id}
-              sx={{
-                mb: 3,
+          {!loading &&
+            !error &&
+            bookings.map(booking => (
+              <Card
+                key={booking.id}
+                sx={{
+                  mb: 3,
                 bgcolor: '#000',
-                color: '#fff',
-                border: '1px solid #d4af37',
-                borderRadius: 3,
-                boxShadow: '0px 4px 12px rgba(0,0,0,0.4)'
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    color: '#d4af37',
-                    mb: 1
-                  }}
-                >
-                  {booking.event.name}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{ color: '#ccc', mb: 1 }}
-                >
-                  Seat: Row {booking.seat.row} - #{booking.seat.number}
-                </Typography>
-                <Divider sx={{ borderColor: '#333', my: 1 }} />
-                <Typography variant="body2" sx={{ color: '#bbb' }}>
-                  Date: {booking.event.date}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#bbb' }}>
-                  Location: {booking.event.location}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#bbb' }}>
-                  Status: {booking.paymentStatus}
-                </Typography>
-                <Typography variant="body2" sx={{ color: '#bbb' }}>
+                  color: '#fff',
+                  border: '1px solid #d4af37',
+                  borderRadius: 3,
+                  boxShadow: '0px 4px 12px rgba(0,0,0,0.4)'
+                }}
+              >
+                <CardContent>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: '#d4af37',
+                        mb: 1
+                      }}
+                    >
+                      {booking.event.name}
+                    </Typography>
+                                        <Typography
+                      variant="body1"
+                      sx={{                         color: '#ccc', mb: 1                       }}
+                    >
+                      Seat:                       Row {booking.seat.row} - #{booking.seat.number}
+                    </Typography>
+                  <Divider sx={{ borderColor: '#333', my: 1 }} />
+                    <Typography variant="body2" sx={{ color: '#bbb' }}>
+                      Date: {booking.event.date}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#bbb' }}>
+                      Location:                       {booking.event.location}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#bbb' }}>
+                      Status: {booking.paymentStatus}
+                    </Typography>
+                  <Typography variant="body2" sx={{ color: '#bbb' }}>
                   Booked At: {new Date(booking.bookingTime).toLocaleString()}
                 </Typography>
-              </CardContent>
-            </Card>
-          ))}
-      </Box>
-    </Container>
-  );
+                </CardContent>
+              </Card>
+            ))}
+        </Box>
+      </Container>
+      );
 };
 
 export default Dashboard;

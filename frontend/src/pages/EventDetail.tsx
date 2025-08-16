@@ -133,7 +133,7 @@ const EventDetail: React.FC = () => {
   }, [eventId]);
 
   // In the event card section, display the price:
- 
+
 
   const handleBook = async (seatId: number) => {
     setBookingMsg('');
