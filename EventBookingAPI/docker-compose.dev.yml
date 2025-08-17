@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database for Development
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: eventbooking-postgres-dev
+    environment:
+      POSTGRES_DB: ${DEV_POSTGRES_DB:-eventbookingdb_dev}
+      POSTGRES_USER: ${DEV_POSTGRES_USER:-devuser}
+      POSTGRES_PASSWORD: ${DEV_POSTGRES_PASSWORD:-devpass123}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    networks:
+      - eventbooking-dev-network
+
+  # Redis for Development
+  redis-dev:
+    image: redis:7-alpine
+    container_name: eventbooking-redis-dev
+    ports:
+      - "6380:6379"
+    networks:
+      - eventbooking-dev-network
+
+  # Event Booking API for Development
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: eventbooking-api-dev
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - ConnectionStrings__DefaultConnection=${DEV_CONNECTION_STRING:-Host=postgres-dev;Database=eventbookingdb_dev;Username=devuser;Password=devpass123}
+      - Jwt__Key=${DEV_JWT_KEY:-dev-jwt-key-that-is-at-least-32-characters-long-for-development}
+      - Jwt__Issuer=${JWT_ISSUER:-EventBookingAPI}
+      - Jwt__Audience=${JWT_AUDIENCE:-EventBookingAPIUsers}
+      - Jwt__ExpiresInMinutes=${JWT_EXPIRES_IN_MINUTES:-60}
+      - Stripe__SecretKey=${STRIPE_SECRET_KEY}
+      - Stripe__PublishableKey=${STRIPE_PUBLISHABLE_KEY}
+      - SendGrid__ApiKey=${SENDGRID_API_KEY}
+      - SendGrid__FromEmail=${DEV_SENDGRID_FROM_EMAIL:-dev@yourdomain.com}
+    ports:
+      - "5000:8080"
+    volumes:
+      - .:/src
+      - /src/bin
+      - /src/obj
+    depends_on:
+      - postgres-dev
+      - redis-dev
+    networks:
+      - eventbooking-dev-network
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  eventbooking-dev-network:
+    driver: bridge

@@ -1,0 +1,24 @@
+# Development Dockerfile with hot reload
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+WORKDIR /src
+
+# Install dotnet-ef tool for migrations
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Copy csproj and restore dependencies
+COPY EventBookingAPI.csproj .
+RUN dotnet restore
+
+# Expose port
+EXPOSE 8080
+
+# Set environment variables
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Development
+
+# Copy everything and run with watch
+COPY . .
+
+# Run with hot reload
+CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:8080"]
