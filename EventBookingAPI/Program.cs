@@ -131,12 +131,20 @@ builder.Services.AddSingleton<EventBookingAPI.Services.EmailService>();
 
 var app = builder.Build();
 
-// Swagger in development
-if (app.Environment.IsDevelopment())
+// Swagger in all environments (including production)
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Event Booking API v1");
+    c.RoutePrefix = "swagger"; // Available at /swagger
+    c.DocumentTitle = "Event Booking API Documentation";
+    
+    // Optional: Add some styling for production
+    if (!app.Environment.IsDevelopment())
+    {
+        c.DefaultModelsExpandDepth(-1); // Hide models section in production
+    }
+});
 
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
