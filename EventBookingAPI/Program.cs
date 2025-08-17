@@ -62,7 +62,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-            builder.Configuration["FrontendUrl"] ?? "http://localhost:5173"
+            builder.Configuration["FrontendUrl"] ?? "https://book-my-seat-three.vercel.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
