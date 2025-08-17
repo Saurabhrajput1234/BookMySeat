@@ -1,0 +1,60 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: eventbooking-postgres
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.postgres
+    envVars:
+      - key: POSTGRES_DB
+        value: eventbooking
+      - key: POSTGRES_USER
+        value: postgres
+      - key: POSTGRES_PASSWORD
+        generateValue: true
+
+  # Redis Cache
+  - type: redis
+    name: eventbooking-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+
+  # Event Booking API
+  - type: web
+    name: eventbooking-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:10000
+      - key: ConnectionStrings__DefaultConnection
+        fromDatabase:
+          name: eventbooking-postgres
+          property: connectionString
+      - key: JWT_KEY
+        generateValue: true
+      - key: JWT_ISSUER
+        value: EventBookingAPI
+      - key: JWT_AUDIENCE
+        value: EventBookingAPIUsers
+      - key: JWT_EXPIRES_IN_MINUTES
+        value: 60
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: SENDGRID_FROM_EMAIL
+        sync: false
+      - key: Redis__ConnectionString
+        fromService:
+          type: redis
+          name: eventbooking-redis
+          property: connectionString
+    buildCommand: dotnet restore && dotnet build -c Release
+    startCommand: dotnet EventBookingAPI.dll
+    healthCheckPath: /health
