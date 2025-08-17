@@ -130,7 +130,7 @@ button:disabled {
 
 /* Card Components */
 .card, .MuiPaper-root {
-  background: var(--color-bg-card) !important;
+  /* background: var(--color-bg-card) !important; */
   border-radius: var(--radius-xl) !important;
   box-shadow: var(--shadow-md) !important;
   padding: var(--spacing-xl) !important;
