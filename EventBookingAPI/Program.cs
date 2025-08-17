@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -95,7 +96,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Convert.FromBase64String(key)
+            IsBase64String(key) ? Convert.FromBase64String(key) : Encoding.UTF8.GetBytes(key)
         ),
         RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     };
@@ -146,3 +147,20 @@ app.MapControllers();
 app.MapHub<EventBookingAPI.Hubs.SeatHub>("/seathub");
 
 app.Run();
+
+// Helper method to check if string is Base64
+static bool IsBase64String(string base64)
+{
+    if (string.IsNullOrEmpty(base64))
+        return false;
+
+    try
+    {
+        Convert.FromBase64String(base64);
+        return true;
+    }
+    catch (FormatException)
+    {
+        return false;
+    }
+}
