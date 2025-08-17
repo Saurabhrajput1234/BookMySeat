@@ -110,7 +110,7 @@ const EventDetail: React.FC = () => {
     loadData();
 
     const conn = new HubConnectionBuilder()
-      .withUrl('http://localhost:5000/seathub', {
+      .withUrl('https://bookmyseat-gm9o.onrender.com/seathub', {
         accessTokenFactory: () => localStorage.getItem('token') || ''
       })
       .withAutomaticReconnect()

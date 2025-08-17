@@ -6,7 +6,7 @@ Your API is deployed at `https://bookmyseat-gm9o.onrender.com` but has a JWT key
 
 ### 1. Generate Proper JWT Key
 
-Run this command to generate a proper Base64 JWT key
+Run this command to generate a proper Base64 JWT k
 
 ```bash
 # Generate secure Base64 key

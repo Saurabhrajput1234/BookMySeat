@@ -16,7 +16,7 @@ const Events: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/events')
+    axios.get('https://bookmyseat-gm9o.onrender.com/api/events')
       .then(res => {
         setEvents(res.data);
         setLoading(false);
